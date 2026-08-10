@@ -35,12 +35,16 @@
         <button onclick="doLogout()">Ausloggen</button>
     </div>
 </div>
-
 <script>
     // ============================================================
-    // NUR LOKALER TEST – KEIN SUPABASE
+    // SUPABASE-KONFIG
     // ============================================================
+    const SUPABASE_URL = 'https://oikomaauhwwthmpufn.supabase.co';
+    const SUPABASE_ANON_KEY = 'sb_publishable_qPFjKF7p9gXu-SJQ4neo8w_wXyqL...';
 
+    // ============================================================
+    // UI-FUNKTIONEN
+    // ============================================================
     function showReg() {
         document.getElementById('loginArea').classList.add('hidden');
         document.getElementById('registerArea').classList.remove('hidden');
@@ -52,29 +56,82 @@
         document.getElementById('msg').textContent = '';
     }
 
-    function doRegister() {
+    // ============================================================
+    // REGISTRIERUNG MIT SUPABASE
+    // ============================================================
+    async function doRegister() {
         const user = document.getElementById('regUser').value;
         const mail = document.getElementById('regMail').value;
         const pass = document.getElementById('regPass').value;
+
+        // 🔥 WICHTIG: Das Element für Fehlermeldungen im Register-Bereich
+        const regMsg = document.getElementById('regMsg');
+
         if (!user || !mail || !pass) {
-            document.getElementById('regMsg').textContent = '❌ Bitte alle Felder ausfüllen!';
+            regMsg.textContent = '❌ Bitte alle Felder ausfüllen!';
             return;
         }
-        // Nur lokal speichern (kein Supabase)
-        localStorage.setItem('test_user', user);
-        localStorage.setItem('test_mail', mail);
-        localStorage.setItem('test_pass', pass);
-        document.getElementById('regMsg').textContent = '✅ Registrierung erfolgreich! Bitte logge dich ein.';
-        showLogin();
+
+        regMsg.textContent = '⏳ Registriere...';
+
+        try {
+            // 1. Account bei Supabase erstellen
+            const response = await fetch(SUPABASE_URL + '/auth/v1/signup', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'apikey': SUPABASE_ANON_KEY
+                },
+                body: JSON.stringify({ email: mail, password: pass })
+            });
+
+            const data = await response.json();
+            console.log('📦 Supabase Antwort:', data);
+
+            if (data.error) {
+                regMsg.textContent = '❌ ' + data.error.message;
+                return;
+            }
+
+            // 2. Profil in der Datenbank anlegen
+            const profileResponse = await fetch(SUPABASE_URL + '/rest/v1/profiles', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'apikey': SUPABASE_ANON_KEY,
+                    'Authorization': 'Bearer ' + data.access_token
+                },
+                body: JSON.stringify({ id: data.user.id, username: user })
+            });
+
+            if (profileResponse.ok) {
+                regMsg.textContent = '✅ Registrierung erfolgreich! Bitte logge dich ein.';
+                // Nach erfolgreicher Registrierung zum Login wechseln
+                setTimeout(() => {
+                    showLogin();
+                }, 2000);
+            } else {
+                const err = await profileResponse.text();
+                regMsg.textContent = '❌ Profil-Fehler: ' + err;
+            }
+        } catch (e) {
+            regMsg.textContent = '❌ Netzwerkfehler: ' + e.message;
+            console.error(e);
+        }
     }
 
+    // ============================================================
+    // LOGIN (NUR LOKAL – NOCH KEIN SUPABASE)
+    // ============================================================
     function doLogin() {
         const user = document.getElementById('user').value;
         const pass = document.getElementById('pass').value;
         const savedUser = localStorage.getItem('test_user');
         const savedPass = localStorage.getItem('test_pass');
+        const msg = document.getElementById('msg');
+
         if (!user || !pass) {
-            document.getElementById('msg').textContent = '❌ Bitte Benutzername und Passwort eingeben!';
+            msg.textContent = '❌ Bitte Benutzername und Passwort eingeben!';
             return;
         }
         if (user === savedUser && pass === savedPass) {
@@ -82,9 +139,9 @@
             document.getElementById('registerArea').classList.add('hidden');
             document.getElementById('dashboard').classList.remove('hidden');
             document.getElementById('nameDisplay').textContent = user;
-            document.getElementById('msg').textContent = '';
+            msg.textContent = '';
         } else {
-            document.getElementById('msg').textContent = '❌ Falscher Benutzername oder Passwort!';
+            msg.textContent = '❌ Falscher Benutzername oder Passwort!';
         }
     }
 
