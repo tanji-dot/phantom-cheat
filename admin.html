@@ -30,10 +30,13 @@
         .btn-danger:hover { box-shadow:0 8px 35px rgba(239,68,68,0.4); }
         .btn-success { background:linear-gradient(135deg,#22c55e,#16a34a); box-shadow:0 4px 20px rgba(34,197,94,0.2); }
         .btn-success:hover { box-shadow:0 8px 35px rgba(34,197,94,0.4); }
-        .btn-sm { padding:0.4rem 0.8rem; font-size:0.75rem; width:auto; border-radius:1rem; }
+        .btn-warning { background:linear-gradient(135deg,#f59e0b,#d97706); box-shadow:0 4px 20px rgba(245,158,11,0.2); }
+        .btn-warning:hover { box-shadow:0 8px 35px rgba(245,158,11,0.4); }
+        .btn-sm { padding:0.3rem 0.8rem; font-size:0.7rem; width:auto; border-radius:1rem; }
         .flex { display:flex; gap:1rem; flex-wrap:wrap; align-items:center; }
         .flex select { flex:2; }
         .flex button { flex:1; }
+        .flex-buttons { display:flex; gap:0.5rem; flex-wrap:wrap; }
         .key-box { background:rgba(0,0,0,0.3); padding:1rem; border-radius:1.2rem; font-family:monospace; font-size:0.85rem; word-break:break-all; border:1px dashed rgba(99,102,241,0.3); max-height:400px; overflow-y:auto; margin-top:0.5rem; }
         .key-box::-webkit-scrollbar { width:4px; }
         .key-box::-webkit-scrollbar-track { background:rgba(255,255,255,0.02); border-radius:10px; }
@@ -67,6 +70,7 @@
         .user-table td { padding:0.5rem 0.4rem; border-bottom:1px solid rgba(255,255,255,0.03); }
         .user-table tr:hover td { background:rgba(255,255,255,0.02); }
         .user-table .actions { display:flex; gap:0.3rem; flex-wrap:wrap; }
+        .delete-all-btn { margin-top:0.5rem; }
         @media (max-width:600px) { .container { padding:1.2rem; } .logo { font-size:1.6rem; } .header { flex-direction:column; align-items:flex-start; gap:0.6rem; } .flex { flex-direction:column; } .flex select, .flex button { flex:1; width:100%; } .stats { gap:0.8rem; } .stats span { padding:0.2rem 0.8rem; font-size:0.75rem; } .user-table { font-size:0.7rem; } .user-table th, .user-table td { padding:0.3rem 0.2rem; } .btn-sm { padding:0.2rem 0.5rem; font-size:0.65rem; } }
     </style>
 </head>
@@ -106,6 +110,10 @@
         <div class="card">
             <div class="card-title"><span class="icon">📋</span> Alle Keys</div>
             <div id="keyList" class="key-box">🔄 Lade Keys...</div>
+            <div class="flex" style="margin-top:0.8rem;">
+                <button class="btn btn-danger btn-sm delete-all-btn" id="deleteAllKeysBtn">🗑️ Alle Keys löschen</button>
+                <button class="btn btn-warning btn-sm" id="refreshKeysBtn">🔄 Aktualisieren</button>
+            </div>
         </div>
 
         <div class="card">
@@ -154,6 +162,8 @@
         var freeKeys = document.getElementById('freeKeys');
         var usedKeys = document.getElementById('usedKeys');
         var lifetimeKeys = document.getElementById('lifetimeKeys');
+        var deleteAllKeysBtn = document.getElementById('deleteAllKeysBtn');
+        var refreshKeysBtn = document.getElementById('refreshKeysBtn');
 
         // ===== TABS =====
         var tabs = document.querySelectorAll('.tab');
@@ -220,6 +230,7 @@
                     html += '<span class="' + statusClass + '">' + status + '</span>';
                     html += ' 🔑 ' + k.key;
                     html += ' <span class="badge ' + badgeClass + '">' + durationText + '</span>';
+                    html += ' <button class="btn btn-danger btn-sm" onclick="deleteKey(\'' + k.key + '\')">🗑️</button>';
                     html += '</div>';
                 }
 
@@ -256,6 +267,39 @@
                 showMsg('❌ Fehler: ' + e.message, 'error');
             }
         }
+
+        // ===== KEY LÖSCHEN (EINZELN) =====
+        window.deleteKey = function(keyToDelete) {
+            if (confirm('Möchtest du den Key "' + keyToDelete + '" wirklich LÖSCHEN?')) {
+                try {
+                    var keys = JSON.parse(localStorage.getItem('phantom_keys') || '[]');
+                    var newKeys = keys.filter(function(k) { return k.key !== keyToDelete; });
+                    localStorage.setItem('phantom_keys', JSON.stringify(newKeys));
+                    loadKeys();
+                    alert('✅ Key wurde gelöscht!');
+                } catch (e) {
+                    alert('❌ Fehler beim Löschen: ' + e.message);
+                }
+            }
+        };
+
+        // ===== ALLE KEYS LÖSCHEN =====
+        deleteAllKeysBtn.onclick = function() {
+            if (confirm('⚠️ Möchtest du WIRKLICH ALLE Keys löschen? Diese Aktion kann nicht rückgängig gemacht werden!')) {
+                try {
+                    localStorage.setItem('phantom_keys', JSON.stringify([]));
+                    loadKeys();
+                    showMsg('🗑️ Alle Keys wurden gelöscht!', 'success');
+                } catch (e) {
+                    showMsg('❌ Fehler: ' + e.message, 'error');
+                }
+            }
+        };
+
+        refreshKeysBtn.onclick = function() {
+            loadKeys();
+            showMsg('🔄 Keys aktualisiert!', 'success');
+        };
 
         // ============================================================
         //  USERS
@@ -411,6 +455,5 @@
 
     })();
 </script>
-
 </body>
 </html>
