@@ -5,21 +5,22 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>PHANTOM</title>
   <style>
-    * { margin:0; padding:0; box-sizing:border-box; font-family:'Segoe UI',system-ui,sans-serif; }
-    body { background:#0a0a0f; color:#e0e0e0; display:flex; justify-content:center; align-items:center; min-height:100vh; }
-    .container { max-width:500px; width:100%; padding:2rem; background:#14141c; border-radius:2rem; border-left:4px solid #a855f7; }
-    h1 { font-size:3rem; background:linear-gradient(135deg,#a855f7,#6366f1); -webkit-background-clip:text; -webkit-text-fill-color:transparent; text-align:center; }
-    .card { background:#1a1a2e; padding:1.5rem; border-radius:1.5rem; margin:1.5rem 0; }
-    .btn { background:linear-gradient(135deg,#a855f7,#6366f1); border:none; color:#fff; padding:0.8rem; border-radius:2rem; font-weight:700; cursor:pointer; width:100%; }
-    .btn:hover { transform:scale(1.02); }
-    input { width:100%; padding:0.8rem; background:#1e1e2a; border:1px solid #333; border-radius:1rem; color:#fff; margin:0.5rem 0; }
-    .hidden { display:none; }
-    a { color:#a855f7; cursor:pointer; text-decoration:underline; }
-    .msg { margin-top:1rem; padding:0.5rem; border-radius:0.5rem; }
-    .error { background:#2a0a0a; color:#ff8888; border:1px solid #ff4444; }
-    .success { background:#0a2a1a; color:#88ffbb; border:1px solid #44ff88; }
-    #downloadBtn { opacity:0.5; pointer-events:none; transition:0.3s; }
-    #downloadBtn.active { opacity:1; pointer-events:auto; }
+    *{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',system-ui,sans-serif}
+    body{background:#0a0a0f;color:#e0e0e0;display:flex;justify-content:center;align-items:center;min-height:100vh}
+    .container{max-width:500px;width:100%;padding:2rem;background:#14141c;border-radius:2rem;border-left:4px solid #a855f7}
+    h1{font-size:3rem;background:linear-gradient(135deg,#a855f7,#6366f1);-webkit-background-clip:text;-webkit-text-fill-color:transparent;text-align:center}
+    .card{background:#1a1a2e;padding:1.5rem;border-radius:1.5rem;margin:1.5rem 0}
+    .btn{background:linear-gradient(135deg,#a855f7,#6366f1);border:none;color:#fff;padding:0.8rem;border-radius:2rem;font-weight:700;cursor:pointer;width:100%}
+    .btn:hover{transform:scale(1.02)}
+    input{width:100%;padding:0.8rem;background:#1e1e2a;border:1px solid #333;border-radius:1rem;color:#fff;margin:0.5rem 0}
+    .hidden{display:none}
+    a{color:#a855f7;cursor:pointer;text-decoration:underline}
+    .msg{margin-top:1rem;padding:0.5rem;border-radius:0.5rem}
+    .error{background:#2a0a0a;color:#ff8888;border:1px solid #ff4444}
+    .success{background:#0a2a1a;color:#88ffbb;border:1px solid #44ff88}
+    #downloadBtn{opacity:0.5;pointer-events:none;transition:0.3s}
+    #downloadBtn.active{opacity:1;pointer-events:auto}
+    .lifetime-badge{color:#fbbf24;font-weight:bold}
   </style>
 </head>
 <body>
@@ -28,7 +29,7 @@
 
   <div id="authSection" class="card">
     <div id="loginForm">
-      <input type="text" id="loginEmail" placeholder="Benutzername oder E-Mail">
+      <input type="text" id="loginEmail" placeholder="E-Mail oder Benutzername">
       <input type="password" id="loginPassword" placeholder="Passwort">
       <button class="btn" id="loginBtn">Anmelden</button>
       <p style="text-align:center;margin-top:0.5rem;"><a id="registerLink">Registrieren</a></p>
@@ -68,239 +69,264 @@
 </div>
 
 <script>
-  // ============================================================
-  // 🔥 100 % OFFLINE – NUR LOKALER SPEICHER
-  // ============================================================
+  (function() {
+    "use strict";
 
-  // ============================================================
-  // DOM
-  // ============================================================
-  const loginForm = document.getElementById('loginForm');
-  const registerForm = document.getElementById('registerForm');
-  const authSection = document.getElementById('authSection');
-  const dashboard = document.getElementById('dashboard');
-  const msgBox = document.getElementById('msgBox');
+    // DOM
+    var loginForm = document.getElementById('loginForm');
+    var registerForm = document.getElementById('registerForm');
+    var authSection = document.getElementById('authSection');
+    var dashboard = document.getElementById('dashboard');
+    var msgBox = document.getElementById('msgBox');
 
-  const loginBtn = document.getElementById('loginBtn');
-  const registerBtn = document.getElementById('registerBtn');
-  const activateBtn = document.getElementById('activateBtn');
-  const logoutBtn = document.getElementById('logoutBtn');
-  const registerLink = document.getElementById('registerLink');
-  const loginLink = document.getElementById('loginLink');
+    var loginBtn = document.getElementById('loginBtn');
+    var registerBtn = document.getElementById('registerBtn');
+    var activateBtn = document.getElementById('activateBtn');
+    var logoutBtn = document.getElementById('logoutBtn');
+    var registerLink = document.getElementById('registerLink');
+    var loginLink = document.getElementById('loginLink');
 
-  function showMsg(text, type) {
-    msgBox.className = 'msg ' + type;
-    msgBox.textContent = text;
-    msgBox.classList.remove('hidden');
-  }
-  function hideMsg() { msgBox.classList.add('hidden'); }
-
-  // ============================================================
-  // NAVIGATION
-  // ============================================================
-  registerLink.onclick = (e) => {
-    e.preventDefault();
-    hideMsg();
-    loginForm.style.display = 'none';
-    registerForm.style.display = 'block';
-  };
-  loginLink.onclick = (e) => {
-    e.preventDefault();
-    hideMsg();
-    loginForm.style.display = 'block';
-    registerForm.style.display = 'none';
-  };
-
-  // ============================================================
-  // REGISTRIERUNG (LOKAL)
-  // ============================================================
-  registerBtn.onclick = function() {
-    hideMsg();
-    const user = document.getElementById('regUsername').value.trim();
-    const email = document.getElementById('regEmail').value.trim();
-    const password = document.getElementById('regPassword').value;
-
-    if (!user || !email || !password) {
-      showMsg('Bitte alle Felder ausfüllen!', 'error');
-      return;
-    }
-    if (password.length < 6) {
-      showMsg('Passwort muss min. 6 Zeichen haben.', 'error');
-      return;
+    function showMsg(text, type) {
+      msgBox.className = 'msg ' + type;
+      msgBox.textContent = text;
+      msgBox.classList.remove('hidden');
     }
 
-    // Prüfen, ob Benutzername oder E-Mail bereits existiert
-    const users = JSON.parse(localStorage.getItem('phantom_users') || '[]');
-    if (users.find(u => u.username === user)) {
-      showMsg('Benutzername bereits vergeben!', 'error');
-      return;
-    }
-    if (users.find(u => u.email === email)) {
-      showMsg('E-Mail bereits registriert!', 'error');
-      return;
+    function hideMsg() {
+      msgBox.classList.add('hidden');
+      msgBox.textContent = '';
     }
 
-    // Neuen User speichern
-    users.push({ username: user, email, password, key: null, keyExpiry: null });
-    localStorage.setItem('phantom_users', JSON.stringify(users));
+    // Navigation
+    registerLink.onclick = function(e) {
+      e.preventDefault();
+      hideMsg();
+      loginForm.style.display = 'none';
+      registerForm.style.display = 'block';
+    };
 
-    showMsg('✅ Registrierung erfolgreich! Bitte logge dich ein.', 'success');
-    setTimeout(() => {
+    loginLink.onclick = function(e) {
+      e.preventDefault();
+      hideMsg();
       loginForm.style.display = 'block';
       registerForm.style.display = 'none';
-    }, 2000);
-  };
+    };
 
-  // ============================================================
-  // LOGIN (LOKAL)
-  // ============================================================
-  loginBtn.onclick = function() {
-    hideMsg();
-    const email = document.getElementById('loginEmail').value.trim();
-    const password = document.getElementById('loginPassword').value;
+    // Registrierung
+    registerBtn.onclick = function() {
+      hideMsg();
+      var user = document.getElementById('regUsername').value.trim();
+      var email = document.getElementById('regEmail').value.trim();
+      var password = document.getElementById('regPassword').value;
 
-    if (!email || !password) {
-      showMsg('Bitte Benutzername/E-Mail und Passwort eingeben!', 'error');
-      return;
-    }
-
-    const users = JSON.parse(localStorage.getItem('phantom_users') || '[]');
-    const user = users.find(u => (u.email === email || u.username === email) && u.password === password);
-
-    if (!user) {
-      showMsg('Falscher Benutzername/E-Mail oder Passwort!', 'error');
-      return;
-    }
-
-    // Eingeloggt speichern
-    localStorage.setItem('phantom_logged_in', JSON.stringify({ username: user.username, email: user.email }));
-
-    authSection.style.display = 'none';
-    dashboard.style.display = 'block';
-    document.getElementById('usernameDisplay').textContent = user.username;
-    loadUserData(user);
-  };
-
-  // ============================================================
-  // USER-DATEN LADEN
-  // ============================================================
-  function loadUserData(user) {
-    if (user.key && user.keyExpiry) {
-      const expiry = new Date(user.keyExpiry);
-      if (expiry > new Date()) {
-        document.getElementById('keyStatus').innerHTML = '✅ Aktiviert';
-        document.getElementById('keyExpiry').textContent = expiry.toLocaleDateString();
-        document.getElementById('downloadBtn').classList.add('active');
+      if (!user || !email || !password) {
+        showMsg('Bitte alle Felder ausfüllen!', 'error');
         return;
       }
-    }
-    document.getElementById('keyStatus').innerHTML = '❌ Kein Key aktiviert';
-    document.getElementById('keyExpiry').textContent = '–';
-    document.getElementById('downloadBtn').classList.remove('active');
-  }
+      if (password.length < 6) {
+        showMsg('Passwort muss mindestens 6 Zeichen haben.', 'error');
+        return;
+      }
 
-  // ============================================================
-  // KEY AKTIVIEREN (LOKAL)
-  // ============================================================
-  activateBtn.onclick = function() {
-    const key = document.getElementById('activationKey').value.trim();
-    const loggedIn = JSON.parse(localStorage.getItem('phantom_logged_in'));
-    if (!loggedIn) {
-      showMsg('Bitte zuerst einloggen.', 'error');
-      return;
-    }
-    if (!key) {
-      showMsg('Bitte einen Key eingeben.', 'error');
-      return;
-    }
+      var users = JSON.parse(localStorage.getItem('phantom_users') || '[]');
+      if (users.find(function(u) { return u.username === user; })) {
+        showMsg('Benutzername bereits vergeben!', 'error');
+        return;
+      }
+      if (users.find(function(u) { return u.email === email; })) {
+        showMsg('E-Mail bereits registriert!', 'error');
+        return;
+      }
 
-    // Prüfen, ob der Key gültig ist (nur lokal gespeicherte Keys)
-    const validKeys = JSON.parse(localStorage.getItem('phantom_keys') || '[]');
-    const keyData = validKeys.find(k => k.key === key && !k.used);
-
-    if (!keyData) {
-      showMsg('Ungültiger oder bereits verwendeter Key.', 'error');
-      return;
-    }
-
-    // Key als verwendet markieren
-    keyData.used = true;
-    localStorage.setItem('phantom_keys', JSON.stringify(validKeys));
-
-    // User aktualisieren
-    const users = JSON.parse(localStorage.getItem('phantom_users') || '[]');
-    const user = users.find(u => u.username === loggedIn.username);
-    if (user) {
-      user.key = key;
-      const expiry = new Date();
-      expiry.setDate(expiry.getDate() + 7); // 7 Tage gültig
-      user.keyExpiry = expiry.toISOString();
+      users.push({ username: user, email: email, password: password, key: null, keyExpiry: null, keyDuration: null });
       localStorage.setItem('phantom_users', JSON.stringify(users));
+
+      showMsg('✅ Registrierung erfolgreich! Bitte logge dich ein.', 'success');
+      setTimeout(function() {
+        loginForm.style.display = 'block';
+        registerForm.style.display = 'none';
+      }, 2000);
+    };
+
+    // Login
+    loginBtn.onclick = function() {
+      hideMsg();
+      var email = document.getElementById('loginEmail').value.trim();
+      var password = document.getElementById('loginPassword').value;
+
+      if (!email || !password) {
+        showMsg('Bitte E-Mail und Passwort eingeben!', 'error');
+        return;
+      }
+
+      var users = JSON.parse(localStorage.getItem('phantom_users') || '[]');
+      var user = null;
+      for (var i = 0; i < users.length; i++) {
+        if ((users[i].email === email || users[i].username === email) && users[i].password === password) {
+          user = users[i];
+          break;
+        }
+      }
+
+      if (!user) {
+        showMsg('Falsche E-Mail oder Passwort!', 'error');
+        return;
+      }
+
       localStorage.setItem('phantom_logged_in', JSON.stringify({ username: user.username, email: user.email }));
+
+      authSection.style.display = 'none';
+      dashboard.style.display = 'block';
+      document.getElementById('usernameDisplay').textContent = user.username;
+      loadUserData(user);
+    };
+
+    // User-Daten laden
+    function loadUserData(user) {
+      if (user.key && user.keyExpiry) {
+        var expiry = new Date(user.keyExpiry);
+        var now = new Date();
+        
+        // Prüfen ob Lifetime
+        if (user.keyDuration === 'lifetime') {
+          document.getElementById('keyStatus').innerHTML = '✅ Aktiviert <span class="lifetime-badge">(⚡ Lifetime)</span>';
+          document.getElementById('keyExpiry').textContent = '∞ Unbegrenzt';
+          document.getElementById('downloadBtn').classList.add('active');
+          return;
+        }
+        
+        if (expiry > now) {
+          document.getElementById('keyStatus').innerHTML = '✅ Aktiviert';
+          document.getElementById('keyExpiry').textContent = expiry.toLocaleDateString();
+          document.getElementById('downloadBtn').classList.add('active');
+          return;
+        }
+      }
+      document.getElementById('keyStatus').innerHTML = '❌ Kein Key aktiviert';
+      document.getElementById('keyExpiry').textContent = '–';
+      document.getElementById('downloadBtn').classList.remove('active');
     }
 
-    showMsg('✅ Key erfolgreich aktiviert!', 'success');
-    loadUserData(user);
-  };
+    // Key aktivieren
+    activateBtn.onclick = function() {
+      var key = document.getElementById('activationKey').value.trim();
+      var loggedIn = JSON.parse(localStorage.getItem('phantom_logged_in'));
+      if (!loggedIn) {
+        showMsg('Bitte zuerst einloggen.', 'error');
+        return;
+      }
+      if (!key) {
+        showMsg('Bitte einen Key eingeben.', 'error');
+        return;
+      }
 
-  // ============================================================
-  // LOGOUT
-  // ============================================================
-  logoutBtn.onclick = function() {
-    localStorage.removeItem('phantom_logged_in');
-    dashboard.style.display = 'none';
-    authSection.style.display = 'block';
-    loginForm.style.display = 'block';
-    registerForm.style.display = 'none';
-    hideMsg();
-  };
+      var validKeys = JSON.parse(localStorage.getItem('phantom_keys') || '[]');
+      var keyData = null;
+      for (var i = 0; i < validKeys.length; i++) {
+        if (validKeys[i].key === key && !validKeys[i].used) {
+          keyData = validKeys[i];
+          break;
+        }
+      }
 
-  // ============================================================
-  // INIT – Prüfen, ob User bereits eingeloggt ist
-  // ============================================================
-  (function init() {
-    const loggedIn = JSON.parse(localStorage.getItem('phantom_logged_in'));
-    if (loggedIn) {
-      const users = JSON.parse(localStorage.getItem('phantom_users') || '[]');
-      const user = users.find(u => u.username === loggedIn.username);
+      if (!keyData) {
+        showMsg('Ungültiger oder bereits verwendeter Key.', 'error');
+        return;
+      }
+
+      // Key als verwendet markieren
+      keyData.used = true;
+      localStorage.setItem('phantom_keys', JSON.stringify(validKeys));
+
+      var users = JSON.parse(localStorage.getItem('phantom_users') || '[]');
+      var user = null;
+      for (var j = 0; j < users.length; j++) {
+        if (users[j].username === loggedIn.username) {
+          user = users[j];
+          break;
+        }
+      }
+      
       if (user) {
-        authSection.style.display = 'none';
-        dashboard.style.display = 'block';
-        document.getElementById('usernameDisplay').textContent = user.username;
+        user.key = key;
+        user.keyDuration = keyData.duration;
+        
+        // Ablaufdatum berechnen (außer bei Lifetime)
+        if (keyData.duration === 'lifetime') {
+          user.keyExpiry = null; // Unbegrenzt
+        } else {
+          var expiry = new Date();
+          var days = parseInt(keyData.duration.replace('days', ''));
+          if (isNaN(days)) days = 7; // Fallback
+          expiry.setDate(expiry.getDate() + days);
+          user.keyExpiry = expiry.toISOString();
+        }
+        
+        localStorage.setItem('phantom_users', JSON.stringify(users));
+        localStorage.setItem('phantom_logged_in', JSON.stringify({ username: user.username, email: user.email }));
+        showMsg('✅ Key erfolgreich aktiviert!', 'success');
         loadUserData(user);
-      } else {
-        localStorage.removeItem('phantom_logged_in');
       }
-    }
+    };
+
+    // Logout
+    logoutBtn.onclick = function() {
+      localStorage.removeItem('phantom_logged_in');
+      dashboard.style.display = 'none';
+      authSection.style.display = 'block';
+      loginForm.style.display = 'block';
+      registerForm.style.display = 'none';
+      hideMsg();
+    };
+
+    // Init – prüfen, ob User bereits eingeloggt ist
+    (function init() {
+      var loggedIn = JSON.parse(localStorage.getItem('phantom_logged_in'));
+      if (loggedIn) {
+        var users = JSON.parse(localStorage.getItem('phantom_users') || '[]');
+        var user = null;
+        for (var i = 0; i < users.length; i++) {
+          if (users[i].username === loggedIn.username) {
+            user = users[i];
+            break;
+          }
+        }
+        if (user) {
+          authSection.style.display = 'none';
+          dashboard.style.display = 'block';
+          document.getElementById('usernameDisplay').textContent = user.username;
+          loadUserData(user);
+        } else {
+          localStorage.removeItem('phantom_logged_in');
+        }
+      }
+    })();
+
+    // Key-Generator für die Konsole (Admin-Funktion)
+    window.generateKey = function(duration) {
+      if (!duration) duration = '7days';
+      var chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+      var key = 'PHANTOM-';
+      for (var i = 0; i < 3; i++) {
+        for (var j = 0; j < 4; j++) {
+          key += chars.charAt(Math.floor(Math.random() * chars.length));
+        }
+        if (i < 2) key += '-';
+      }
+      var keys = JSON.parse(localStorage.getItem('phantom_keys') || '[]');
+      keys.push({ key: key, used: false, duration: duration, created: new Date().toISOString() });
+      localStorage.setItem('phantom_keys', JSON.stringify(keys));
+      alert('✅ Key generiert: ' + key + ' (Dauer: ' + duration + ')');
+      return key;
+    };
+
+    window.listKeys = function() {
+      var keys = JSON.parse(localStorage.getItem('phantom_keys') || '[]');
+      console.table(keys);
+      return keys;
+    };
+
   })();
-
-  // ============================================================
-  // ADMIN-FUNKTION (KEY GENERIEREN) – NUR FÜR DICH!
-  // ============================================================
-  // Wenn du einen Key generieren willst, öffne die Konsole (F12)
-  // und gib ein: generateKey()
-  window.generateKey = function() {
-    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-    let key = 'PHANTOM-';
-    for (let i = 0; i < 3; i++) {
-      for (let j = 0; j < 4; j++) {
-        key += chars.charAt(Math.floor(Math.random() * chars.length));
-      }
-      if (i < 2) key += '-';
-    }
-    const keys = JSON.parse(localStorage.getItem('phantom_keys') || '[]');
-    keys.push({ key, used: false });
-    localStorage.setItem('phantom_keys', JSON.stringify(keys));
-    alert('✅ Key generiert: ' + key);
-    return key;
-  };
-
-  // Wenn du alle Keys sehen willst, gib ein: listKeys()
-  window.listKeys = function() {
-    const keys = JSON.parse(localStorage.getItem('phantom_keys') || '[]');
-    console.table(keys);
-    return keys;
-  };
 </script>
 </body>
 </html>
