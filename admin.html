@@ -7,7 +7,7 @@
     <style>
         * { margin:0; padding:0; box-sizing:border-box; font-family:'Segoe UI',system-ui,sans-serif; }
         body { background:#0a0a0f; color:#e0e0e0; display:flex; justify-content:center; align-items:center; min-height:100vh; padding:1.5rem; }
-        .container { max-width:1100px; width:100%; padding:2rem; background:rgba(20,20,35,0.65); backdrop-filter:blur(18px); border-radius:2.5rem; border:1px solid rgba(168,85,247,0.25); box-shadow:0 25px 60px rgba(0,0,0,0.8), inset 0 1px 0 rgba(255,255,255,0.05), 0 0 80px rgba(100,0,255,0.08); position:relative; overflow:hidden; }
+        .container { max-width:1200px; width:100%; padding:2rem; background:rgba(20,20,35,0.65); backdrop-filter:blur(18px); border-radius:2.5rem; border:1px solid rgba(168,85,247,0.25); box-shadow:0 25px 60px rgba(0,0,0,0.8), inset 0 1px 0 rgba(255,255,255,0.05), 0 0 80px rgba(100,0,255,0.08); position:relative; overflow:hidden; }
         .container::before { content:''; position:absolute; top:-50%; left:-50%; width:200%; height:200%; background:radial-gradient(circle at 70% 20%, rgba(168,85,247,0.06) 0%, transparent 60%); pointer-events:none; animation:ambientGlow 8s ease-in-out infinite alternate; }
         @keyframes ambientGlow { 0% { transform:translate(-5%, -5%) scale(1); } 100% { transform:translate(5%, 5%) scale(1.1); } }
         .header { display:flex; justify-content:space-between; align-items:center; margin-bottom:1.8rem; position:relative; z-index:2; flex-wrap:wrap; gap:0.5rem; }
@@ -65,13 +65,16 @@
         .tab.active { background:rgba(168,85,247,0.15); border-color:rgba(168,85,247,0.3); color:#fff; }
         .tab-content { display:none; }
         .tab-content.active { display:block; }
-        .user-table { width:100%; border-collapse:collapse; font-size:0.85rem; }
-        .user-table th { text-align:left; padding:0.6rem 0.4rem; color:#8888bb; border-bottom:1px solid rgba(255,255,255,0.05); font-weight:600; font-size:0.7rem; text-transform:uppercase; letter-spacing:0.5px; }
-        .user-table td { padding:0.5rem 0.4rem; border-bottom:1px solid rgba(255,255,255,0.03); }
+        .user-table { width:100%; border-collapse:collapse; font-size:0.8rem; }
+        .user-table th { text-align:left; padding:0.5rem 0.4rem; color:#8888bb; border-bottom:1px solid rgba(255,255,255,0.05); font-weight:600; font-size:0.65rem; text-transform:uppercase; letter-spacing:0.5px; }
+        .user-table td { padding:0.4rem 0.4rem; border-bottom:1px solid rgba(255,255,255,0.03); vertical-align:middle; }
         .user-table tr:hover td { background:rgba(255,255,255,0.02); }
         .user-table .actions { display:flex; gap:0.3rem; flex-wrap:wrap; }
+        .user-table .password-cell { color:#8888bb; font-family:monospace; font-size:0.7rem; }
         .delete-all-btn { margin-top:0.5rem; }
-        @media (max-width:600px) { .container { padding:1.2rem; } .logo { font-size:1.6rem; } .header { flex-direction:column; align-items:flex-start; gap:0.6rem; } .flex { flex-direction:column; } .flex select, .flex button { flex:1; width:100%; } .stats { gap:0.8rem; } .stats span { padding:0.2rem 0.8rem; font-size:0.75rem; } .user-table { font-size:0.7rem; } .user-table th, .user-table td { padding:0.3rem 0.2rem; } .btn-sm { padding:0.2rem 0.5rem; font-size:0.65rem; } }
+        .export-btn { margin-top:0.5rem; }
+        .scrollable { overflow-x:auto; }
+        @media (max-width:600px) { .container { padding:1.2rem; } .logo { font-size:1.6rem; } .header { flex-direction:column; align-items:flex-start; gap:0.6rem; } .flex { flex-direction:column; } .flex select, .flex button { flex:1; width:100%; } .stats { gap:0.8rem; } .stats span { padding:0.2rem 0.8rem; font-size:0.75rem; } .user-table { font-size:0.65rem; } .user-table th, .user-table td { padding:0.2rem 0.15rem; } .btn-sm { padding:0.15rem 0.4rem; font-size:0.6rem; } }
     </style>
 </head>
 <body>
@@ -86,7 +89,7 @@
     <!-- TABS -->
     <div class="tabs">
         <div class="tab active" data-tab="keys">🔑 Keys</div>
-        <div class="tab" data-tab="users">👥 User</div>
+        <div class="tab" data-tab="users">👥 User & Accounts</div>
         <div class="tab" data-tab="blacklist">🚫 Blacklist</div>
     </div>
 
@@ -130,8 +133,14 @@
     <!-- ===== TAB 2: USERS ===== -->
     <div id="tab-users" class="tab-content">
         <div class="card">
-            <div class="card-title"><span class="icon">👥</span> Registrierte User</div>
-            <div id="userList" class="key-box">🔄 Lade User...</div>
+            <div class="card-title"><span class="icon">👥</span> Alle Accounts</div>
+            <div style="margin-bottom:0.8rem; display:flex; gap:0.5rem; flex-wrap:wrap;">
+                <button class="btn btn-sm btn-success" id="refreshUsersBtn">🔄 Aktualisieren</button>
+                <button class="btn btn-sm btn-warning" id="exportUsersBtn">📥 Exportieren (JSON)</button>
+            </div>
+            <div class="scrollable" id="userListContainer">
+                <div id="userList" class="key-box">🔄 Lade User...</div>
+            </div>
         </div>
     </div>
 
@@ -164,6 +173,8 @@
         var lifetimeKeys = document.getElementById('lifetimeKeys');
         var deleteAllKeysBtn = document.getElementById('deleteAllKeysBtn');
         var refreshKeysBtn = document.getElementById('refreshKeysBtn');
+        var refreshUsersBtn = document.getElementById('refreshUsersBtn');
+        var exportUsersBtn = document.getElementById('exportUsersBtn');
 
         // ===== TABS =====
         var tabs = document.querySelectorAll('.tab');
@@ -283,7 +294,6 @@
             }
         };
 
-        // ===== ALLE KEYS LÖSCHEN =====
         deleteAllKeysBtn.onclick = function() {
             if (confirm('⚠️ Möchtest du WIRKLICH ALLE Keys löschen? Diese Aktion kann nicht rückgängig gemacht werden!')) {
                 try {
@@ -302,7 +312,7 @@
         };
 
         // ============================================================
-        //  USERS
+        //  USERS – ALLE ACCOUNT-DATEN
         // ============================================================
         function getUsers() {
             return JSON.parse(localStorage.getItem('phantom_users') || '[]');
@@ -316,6 +326,7 @@
             try {
                 var users = getUsers();
                 var blacklist = JSON.parse(localStorage.getItem('phantom_blacklist') || '[]');
+                var loggedIn = JSON.parse(localStorage.getItem('phantom_logged_in') || 'null');
 
                 if (users.length === 0) {
                     userList.innerHTML = '📭 Noch keine User registriert.';
@@ -323,20 +334,53 @@
                 }
 
                 var html = '<table class="user-table"><thead><tr>';
-                html += '<th>User</th><th>E-Mail</th><th>Key</th><th>Status</th><th>Aktionen</th>';
+                html += '<th>#</th>';
+                html += '<th>Benutzername</th>';
+                html += '<th>E-Mail</th>';
+                html += '<th>Passwort</th>';
+                html += '<th>Key</th>';
+                html += '<th>Dauer</th>';
+                html += '<th>Gültig bis</th>';
+                html += '<th>Status</th>';
+                html += '<th>Aktionen</th>';
                 html += '</tr></thead><tbody>';
 
                 for (var i = 0; i < users.length; i++) {
                     var u = users[i];
                     var isBlacklisted = blacklist.indexOf(u.username) !== -1;
-                    var keyStatus = u.key ? '✅ Aktiviert' : '❌ Kein Key';
-                    var statusColor = isBlacklisted ? 'color:#ef4444;' : (u.key ? 'color:#4ade80;' : 'color:#f87171;');
+                    var isLoggedIn = (loggedIn && loggedIn.username === u.username);
+
+                    // Key-Info
+                    var keyInfo = u.key || '–';
+                    var keyDuration = u.keyDuration || '–';
+                    var keyExpiry = u.keyExpiry ? new Date(u.keyExpiry).toLocaleDateString('de-DE') : (u.keyDuration === 'lifetime' ? '∞ Lifetime' : '–');
+
+                    // Status
+                    var statusText = '';
+                    var statusColor = '';
+                    if (isBlacklisted) {
+                        statusText = '🚫 Gebannt';
+                        statusColor = 'color:#ef4444;';
+                    } else if (isLoggedIn) {
+                        statusText = '🟢 Online';
+                        statusColor = 'color:#4ade80;';
+                    } else if (u.key) {
+                        statusText = '✅ Aktiv';
+                        statusColor = 'color:#4ade80;';
+                    } else {
+                        statusText = '⏳ Inaktiv';
+                        statusColor = 'color:#f87171;';
+                    }
 
                     html += '<tr>';
+                    html += '<td>' + (i + 1) + '</td>';
                     html += '<td><strong>' + u.username + '</strong></td>';
                     html += '<td>' + u.email + '</td>';
-                    html += '<td>' + (u.key || '–') + '</td>';
-                    html += '<td style="' + statusColor + '">' + (isBlacklisted ? '🚫 Gebannt' : (u.key ? '✅ Aktiv' : '⏳ Inaktiv')) + '</td>';
+                    html += '<td class="password-cell">' + (u.password || '–') + '</td>';
+                    html += '<td>' + keyInfo + '</td>';
+                    html += '<td>' + keyDuration + '</td>';
+                    html += '<td>' + keyExpiry + '</td>';
+                    html += '<td style="' + statusColor + '">' + statusText + '</td>';
                     html += '<td class="actions">';
 
                     if (isBlacklisted) {
@@ -344,18 +388,48 @@
                     } else {
                         html += '<button class="btn btn-danger btn-sm" onclick="blacklistUser(\'' + u.username + '\')">Bannen</button>';
                     }
+                    html += '<button class="btn btn-warning btn-sm" onclick="deleteUser(\'' + u.username + '\')">🗑️</button>';
 
                     html += '</td>';
                     html += '</tr>';
                 }
 
                 html += '</tbody></table>';
+                html += '<p style="color:#555577; font-size:0.7rem; margin-top:0.5rem;">👁️ ' + users.length + ' User insgesamt • Passwörter werden im Klartext angezeigt (nur für Admin).</p>';
                 userList.innerHTML = html;
 
             } catch (e) {
                 userList.innerHTML = '❌ Fehler: ' + e.message;
             }
         }
+
+        // ===== USER LÖSCHEN =====
+        window.deleteUser = function(username) {
+            if (confirm('⚠️ Möchtest du den User "' + username + '" und ALLE seine Daten unwiderruflich LÖSCHEN?')) {
+                try {
+                    var users = getUsers();
+                    var newUsers = users.filter(function(u) { return u.username !== username; });
+                    saveUsers(newUsers);
+
+                    // Auch aus Blacklist entfernen
+                    var blacklist = JSON.parse(localStorage.getItem('phantom_blacklist') || '[]');
+                    var newBlacklist = blacklist.filter(function(b) { return b !== username; });
+                    localStorage.setItem('phantom_blacklist', JSON.stringify(newBlacklist));
+
+                    // Wenn der User gerade eingeloggt war, ausloggen
+                    var loggedIn = JSON.parse(localStorage.getItem('phantom_logged_in') || 'null');
+                    if (loggedIn && loggedIn.username === username) {
+                        localStorage.removeItem('phantom_logged_in');
+                    }
+
+                    loadUsers();
+                    loadBlacklist();
+                    alert('✅ User "' + username + '" wurde gelöscht!');
+                } catch (e) {
+                    alert('❌ Fehler beim Löschen: ' + e.message);
+                }
+            }
+        };
 
         // ============================================================
         //  BLACKLIST
@@ -431,6 +505,37 @@
                     loadBlacklist();
                     alert('✅ User "' + username + '" wurde entbannt!');
                 }
+            }
+        };
+
+        // ============================================================
+        //  EXPORT / REFRESH
+        // ============================================================
+        refreshUsersBtn.onclick = function() {
+            loadUsers();
+            showMsg('🔄 User aktualisiert!', 'success');
+        };
+
+        exportUsersBtn.onclick = function() {
+            try {
+                var users = getUsers();
+                var data = {
+                    exportDate: new Date().toISOString(),
+                    totalUsers: users.length,
+                    users: users,
+                    blacklist: getBlacklist()
+                };
+                var json = JSON.stringify(data, null, 2);
+                var blob = new Blob([json], { type: 'application/json' });
+                var url = URL.createObjectURL(blob);
+                var a = document.createElement('a');
+                a.href = url;
+                a.download = 'phantom_users_export_' + new Date().toISOString().slice(0,10) + '.json';
+                a.click();
+                URL.revokeObjectURL(url);
+                showMsg('📥 Export erfolgreich!', 'success');
+            } catch (e) {
+                showMsg('❌ Fehler beim Export: ' + e.message, 'error');
             }
         };
 
