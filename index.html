@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PHANTOM · FiveM Cheat</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', system-ui, sans-serif; }
+        body { background: #0a0a0f; color: #e0e0e0; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
+        .container { max-width: 900px; width: 100%; padding: 2rem; background: rgba(20,20,30,0.9); border-radius: 2rem; border: 1px solid #2a2a3a; box-shadow: 0 0 60px rgba(100,0,255,0.15); }
+        h1 { font-size: 4rem; font-weight: 800; background: linear-gradient(135deg, #a855f7, #6366f1); -webkit-background-clip: text; -webkit-text-fill-color: transparent; text-align: center; letter-spacing: 4px; }
+        .subtitle { text-align: center; color: #8888aa; margin-bottom: 2rem; border-bottom: 1px solid #2a2a3a; padding-bottom: 1rem; }
+        .card { background: #14141c; padding: 1.5rem; border-radius: 1.5rem; margin: 1.5rem 0; border-left: 4px solid #a855f7; }
+        .btn { background: linear-gradient(135deg, #a855f7, #6366f1); border: none; color: white; padding: 0.8rem 2rem; border-radius: 3rem; font-weight: 700; cursor: pointer; transition: 0.3s; font-size: 1rem; }
+        .btn:hover { transform: scale(1.05); box-shadow: 0 0 30px rgba(168,85,247,0.4); }
+        input { width: 100%; padding: 0.8rem; background: #1e1e2a; border: 1px solid #333344; border-radius: 1rem; color: white; margin: 0.5rem 0; }
+        .hidden { display: none; }
+        a { color: #a855f7; cursor: pointer; text-decoration: underline; }
+        .status { padding: 0.5rem 1rem; border-radius: 2rem; background: #1e1e2a; display: inline-block; }
+        .green { color: #4ade80; }
+        footer { text-align: center; margin-top: 2rem; color: #555566; font-size: 0.8rem; }
+        .flex { display: flex; gap: 1rem; flex-wrap: wrap; justify-content: center; }
+        #downloadBtn { opacity: 0.5; pointer-events: none; }
+        #downloadBtn.active { opacity: 1; pointer-events: auto; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>👻 PHANTOM</h1>
+    <div class="subtitle">▸ unsichtbar · unaufhaltsam · dein</div>
+
+    <!-- ===== LOGIN / REGISTRIERUNG ===== -->
+    <div id="authSection" class="card">
+        <h2>🔐 Anmelden oder Registrieren</h2>
+        <div id="loginForm">
+            <input type="email" id="loginEmail" placeholder="E-Mail">
+            <input type="password" id="loginPassword" placeholder="Passwort">
+            <button class="btn" onclick="login()">Anmelden</button>
+            <p>Noch keinen Account? <a onclick="showRegister()">Registrieren</a></p>
+        </div>
+        <div id="registerForm" class="hidden">
+            <input type="text" id="regUsername" placeholder="Benutzername">
+            <input type="email" id="regEmail" placeholder="E-Mail">
+            <input type="password" id="regPassword" placeholder="Passwort">
+            <button class="btn" onclick="register()">Registrieren</button>
+            <p>Schon registriert? <a onclick="showLogin()">Anmelden</a></p>
+        </div>
+    </div>
+
+    <!-- ===== DASHBOARD ===== -->
+    <div id="dashboard" class="hidden card">
+        <h2>🎮 Willkommen, <span id="usernameDisplay"></span>!</h2>
+        <p>Dein Key-Status: <span id="keyStatus">❌ Kein Key aktiviert</span></p>
+        <p>Gültig bis: <span id="keyExpiry">–</span></p>
+        <div style="margin-top:1.5rem;">
+            <h3>📥 Cheat herunterladen</h3>
+            <a href="phantom.dll" download class="btn" id="downloadBtn">📥 PHANTOM.dll herunterladen</a>
+            <p style="font-size:0.8rem; color:#666;">Nur verfügbar mit aktivem Key.</p>
+        </div>
+        <div style="margin-top:1.5rem;">
+            <h3>🔑 Key aktivieren</h3>
+            <input type="text" id="activationKey" placeholder="PHANTOM-XXXX-XXXX-XXXX|YYYY-MM-DD">
+            <button class="btn" onclick="activateKey()">Key aktivieren</button>
+        </div>
+        <button onclick="logout()" style="background:#444; padding:0.5rem 2rem; border-radius:2rem; border:none; color:white; cursor:pointer; margin-top:1rem;">Ausloggen</button>
+    </div>
+
+    <!-- ===== LIVE-STATUS ===== -->
+    <div class="card">
+        <h2>📊 Live-Status</h2>
+        <div class="flex">
+            <span class="status"><span class="green">●</span> Server: online</span>
+            <span class="status"><span class="green">●</span> Cheat: bereit</span>
+            <span class="status"><span class="green">●</span> Bypass: aktiv</span>
+        </div>
+        <div id="updateInfo">
+            <strong>Letzte Prüfung auf Update:</strong> <span id="checkTime">soeben</span>
+            <br><small>Der Cheat prüft bei jedem Start automatisch diese Seite auf eine neue Version.</small>
+        </div>
+    </div>
+
+    <footer>PHANTOM · nur für Bildungszwecke · 2026 · #rebelcode</footer>
+</div>
+
+<script>
+    // ============================================================
+    // ⚠️ HIER DEINE SUPABASE-DATEN EINTRAGEN!
+    // ============================================================
+    const SUPABASE_URL = 'https://oikomaauhwwthmpufn.supabase.co';
+    const SUPABASE_ANON_KEY = 'sb_publishable_qPFjKF7p9gXu-SJQ4neo8w_wXyqL...';
+
+    // ============================================================
+    // HILFSFUNKTIONEN
+    // ============================================================
+    function showRegister() {
+        document.getElementById('loginForm').style.display = 'none';
+        document.getElementById('registerForm').style.display = 'block';
+    }
+    function showLogin() {
+        document.getElementById('loginForm').style.display = 'block';
+        document.getElementById('registerForm').style.display = 'none';
+    }
+
+    // ============================================================
+    // REGISTRIERUNG
+    // ============================================================
+    async function register() {
+        const email = document.getElementById('regEmail').value;
+        const password = document.getElementById('regPassword').value;
+        const username = document.getElementById('regUsername').value;
+
+        const response = await fetch(`${SUPABASE_URL}/auth/v1/signup`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'apikey': SUPABASE_ANON_KEY
+            },
+            body: JSON.stringify({ email, password })
+        });
+        const data = await response.json();
+        if (data.error) { alert('❌ Fehler: ' + data.error.message); return; }
+
+        const user = data.user;
+        const profileResponse = await fetch(`${SUPABASE_URL}/rest/v1/profiles`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'apikey': SUPABASE_ANON_KEY,
+                'Authorization': `Bearer ${data.access_token}`
+            },
+            body: JSON.stringify({ id: user.id, username: username })
+        });
+
+        if (profileResponse.ok) {
+            alert('✅ Registrierung erfolgreich! Bitte logge dich ein.');
+            showLogin();
+        } else {
+            alert('❌ Profil-Erstellung fehlgeschlagen.');
+        }
+    }
+
+    // ============================================================
+    // LOGIN
+    // ============================================================
+    async function login() {
+        const email = document.getElementById('loginEmail').value;
+        const password = document.getElementById('loginPassword').value;
+
+        const response = await fetch(`${SUPABASE_URL}/auth/v1/token?grant_type=password`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'apikey': SUPABASE_ANON_KEY
+            },
+            body: JSON.stringify({ email, password })
+        });
+        const data = await response.json();
+        if (data.error) { alert('❌ Login fehlgeschlagen: ' + data.error.message); return; }
+
+        localStorage.setItem('phantom_access_token', data.access_token);
+        localStorage.setItem('phantom_user_id', data.user.id);
+
+        document.getElementById('authSection').classList.add('hidden');
+        document.getElementById('dashboard').classList.remove('hidden');
+        loadUserData();
+    }
+
+    // ============================================================
+    // USER-DATEN LADEN
+    // ============================================================
+    async function loadUserData() {
+        const token = localStorage.getItem('phantom_access_token');
+        const userId = localStorage.getItem('phantom_user_id');
+        if (!token || !userId) return;
+
+        const response = await fetch(`${SUPABASE_URL}/rest/v1/profiles?id=eq.${userId}`, {
+            headers: {
+                'apikey': SUPABASE_ANON_KEY,
+                'Authorization': `Bearer ${token}`
+            }
+        });
+        const profiles = await response.json();
+        const profile = profiles[0];
+
+        document.getElementById('usernameDisplay').textContent = profile?.username || 'User';
+
+        if (profile && profile.key_activated) {
+            document.getElementById('keyStatus').innerHTML = '✅ Aktiviert (' + profile.key_activated + ')';
+            document.getElementById('keyExpiry').textContent = new Date(profile.key_expires_at).toLocaleDateString();
+            document.getElementById('downloadBtn').classList.add('active');
+        } else {
+            document.getElementById('keyStatus').innerHTML = '❌ Kein Key aktiviert';
+            document.getElementById('keyExpiry').textContent = '–';
+            document.getElementById('downloadBtn').classList.remove('active');
+        }
+    }
+
+    // ============================================================
+    // KEY AKTIVIEREN
+    // ============================================================
+    async function activateKey() {
+        const key = document.getElementById('activationKey').value.trim();
+        const token = localStorage.getItem('phantom_access_token');
+        const userId = localStorage.getItem('phantom_user_id');
+        if (!token || !userId) { alert('❌ Bitte zuerst einloggen.'); return; }
+
+        const keyResponse = await fetch(`${SUPABASE_URL}/rest/v1/keys?key_value=eq.${encodeURIComponent(key)}`, {
+            headers: {
+                'apikey': SUPABASE_ANON_KEY,
+                'Authorization': `Bearer ${token}`
+            }
+        });
+        const keys = await keyResponse.json();
+        const keyData = keys[0];
+
+        if (!keyData) {
+            alert('❌ Ungültiger Key.');
+            return;
+        }
+        if (keyData.used_by) {
+            alert('❌ Dieser Key wurde bereits verwendet.');
+            return;
+        }
+
+        const now = new Date().toISOString();
+        await fetch(`${SUPABASE_URL}/rest/v1/keys?id=eq.${keyData.id}`, {
+            method: 'PATCH',
+            headers: {
+                'Content-Type': 'application/json',
+                'apikey': SUPABASE_ANON_KEY,
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({ used_by: userId, used_at: now })
+        });
+
+        await fetch(`${SUPABASE_URL}/rest/v1/profiles?id=eq.${userId}`, {
+            method: 'PATCH',
+            headers: {
+                'Content-Type': 'application/json',
+                'apikey': SUPABASE_ANON_KEY,
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({
+                key_activated: keyData.duration,
+                key_expires_at: keyData.expires_at
+            })
+        });
+
+        alert('✅ Key erfolgreich aktiviert!');
+        loadUserData();
+    }
+
+    // ============================================================
+    // LOGOUT
+    // ============================================================
+    function logout() {
+        localStorage.removeItem('phantom_access_token');
+        localStorage.removeItem('phantom_user_id');
+        document.getElementById('dashboard').classList.add('hidden');
+        document.getElementById('authSection').classList.remove('hidden');
+        showLogin();
+    }
+
+    // ============================================================
+    // UPDATE-CHECK
+    // ============================================================
+    setInterval(() => {
+        document.getElementById('checkTime').textContent = new Date().toLocaleTimeString();
+    }, 30000);
+</script>
+</body>
+</html>
