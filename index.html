@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>PHANTOM · FiveM Cheat</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', system-ui, sans-serif; }
@@ -22,6 +22,7 @@
         .flex { display: flex; gap: 1rem; flex-wrap: wrap; justify-content: center; }
         #downloadBtn { opacity: 0.5; pointer-events: none; }
         #downloadBtn.active { opacity: 1; pointer-events: auto; }
+        .error-box { background: #2a0a0a; padding: 1rem; border-radius: 1rem; border: 1px solid #ff4444; color: #ff8888; margin-top: 1rem; display: none; }
     </style>
 </head>
 <body>
@@ -33,18 +34,19 @@
     <div id="authSection" class="card">
         <h2>🔐 Anmelden oder Registrieren</h2>
         <div id="loginForm">
-            <input type="email" id="loginEmail" placeholder="E-Mail">
-            <input type="password" id="loginPassword" placeholder="Passwort">
+            <input type="email" id="loginEmail" placeholder="E-Mail" />
+            <input type="password" id="loginPassword" placeholder="Passwort" />
             <button class="btn" onclick="login()">Anmelden</button>
             <p>Noch keinen Account? <a onclick="showRegister()">Registrieren</a></p>
         </div>
         <div id="registerForm" class="hidden">
-            <input type="text" id="regUsername" placeholder="Benutzername">
-            <input type="email" id="regEmail" placeholder="E-Mail">
-            <input type="password" id="regPassword" placeholder="Passwort">
+            <input type="text" id="regUsername" placeholder="Benutzername" />
+            <input type="email" id="regEmail" placeholder="E-Mail" />
+            <input type="password" id="regPassword" placeholder="Passwort" />
             <button class="btn" onclick="register()">Registrieren</button>
             <p>Schon registriert? <a onclick="showLogin()">Anmelden</a></p>
         </div>
+        <div id="errorBox" class="error-box"></div>
     </div>
 
     <!-- ===== DASHBOARD ===== -->
@@ -59,7 +61,7 @@
         </div>
         <div style="margin-top:1.5rem;">
             <h3>🔑 Key aktivieren</h3>
-            <input type="text" id="activationKey" placeholder="PHANTOM-XXXX-XXXX-XXXX|YYYY-MM-DD">
+            <input type="text" id="activationKey" placeholder="PHANTOM-XXXX-XXXX-XXXX|YYYY-MM-DD" />
             <button class="btn" onclick="activateKey()">Key aktivieren</button>
         </div>
         <button onclick="logout()" style="background:#444; padding:0.5rem 2rem; border-radius:2rem; border:none; color:white; cursor:pointer; margin-top:1rem;">Ausloggen</button>
@@ -75,7 +77,7 @@
         </div>
         <div id="updateInfo">
             <strong>Letzte Prüfung auf Update:</strong> <span id="checkTime">soeben</span>
-            <br><small>Der Cheat prüft bei jedem Start automatisch diese Seite auf eine neue Version.</small>
+            <br /><small>Der Cheat prüft bei jedem Start automatisch diese Seite auf eine neue Version.</small>
         </div>
     </div>
 
@@ -84,139 +86,236 @@
 
 <script>
     // ============================================================
-    // ⚠️ SUPABASE CONFIG – REPLACE WITH YOUR ACTUAL DATA!
+    // ⚠️ HIER DEINE SUPABASE-DATEN EINTRAGEN!
     // ============================================================
     const SUPABASE_URL = 'https://oikomaauhwwthmpufn.supabase.co';
     const SUPABASE_ANON_KEY = 'sb_publishable_qPFjKF7p9gXu-SJQ4neo8w_wXyqlZw-
 ';
 
     // ============================================================
+    // HILFSFUNKTIONEN
+    // ============================================================
+    function showError(msg) {
+        const box = document.getElementById('errorBox');
+        box.style.display = 'block';
+        box.textContent = '❌ ' + msg;
+        console.error('PHANTOM ERROR:', msg);
+    }
+
+    function clearError() {
+        document.getElementById('errorBox').style.display = 'none';
+    }
+
     function showRegister() {
+        clearError();
         document.getElementById('loginForm').style.display = 'none';
         document.getElementById('registerForm').style.display = 'block';
     }
+
     function showLogin() {
+        clearError();
         document.getElementById('loginForm').style.display = 'block';
         document.getElementById('registerForm').style.display = 'none';
     }
 
     // ============================================================
-    // REGISTER
+    // REGISTRIERUNG
     // ============================================================
     async function register() {
+        clearError();
         const email = document.getElementById('regEmail').value;
         const password = document.getElementById('regPassword').value;
         const username = document.getElementById('regUsername').value;
 
-        const response = await fetch(`${SUPABASE_URL}/auth/v1/signup`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_ANON_KEY },
-            body: JSON.stringify({ email, password })
-        });
-        const data = await response.json();
-        if (data.error) { alert('❌ Fehler: ' + data.error.message); return; }
+        if (!email || !password || !username) {
+            showError('Bitte alle Felder ausfüllen!');
+            return;
+        }
 
-        const user = data.user;
-        await fetch(`${SUPABASE_URL}/rest/v1/profiles`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'apikey': SUPABASE_ANON_KEY,
-                'Authorization': `Bearer ${data.access_token}`
-            },
-            body: JSON.stringify({ id: user.id, username: username })
-        });
+        console.log('📝 Registrierung gestartet für:', email);
 
-        alert('✅ Registrierung erfolgreich! Bitte logge dich ein.');
-        showLogin();
+        try {
+            const response = await fetch(SUPABASE_URL + '/auth/v1/signup', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'apikey': SUPABASE_ANON_KEY
+                },
+                body: JSON.stringify({ email, password })
+            });
+
+            const data = await response.json();
+            console.log('📦 Antwort von Supabase:', data);
+
+            if (data.error) {
+                showError('Registrierung fehlgeschlagen: ' + data.error.message);
+                return;
+            }
+
+            const user = data.user;
+            const profileResponse = await fetch(SUPABASE_URL + '/rest/v1/profiles', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'apikey': SUPABASE_ANON_KEY,
+                    'Authorization': 'Bearer ' + data.access_token
+                },
+                body: JSON.stringify({ id: user.id, username: username })
+            });
+
+            if (profileResponse.ok) {
+                alert('✅ Registrierung erfolgreich! Bitte logge dich ein.');
+                showLogin();
+            } else {
+                const err = await profileResponse.text();
+                showError('Profil-Erstellung fehlgeschlagen: ' + err);
+            }
+        } catch (e) {
+            showError('Netzwerkfehler: ' + e.message);
+            console.error(e);
+        }
     }
 
     // ============================================================
     // LOGIN
     // ============================================================
     async function login() {
+        clearError();
         const email = document.getElementById('loginEmail').value;
         const password = document.getElementById('loginPassword').value;
 
-        const response = await fetch(`${SUPABASE_URL}/auth/v1/token?grant_type=password`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_ANON_KEY },
-            body: JSON.stringify({ email, password })
-        });
-        const data = await response.json();
-        if (data.error) { alert('❌ Login fehlgeschlagen: ' + data.error.message); return; }
+        if (!email || !password) {
+            showError('Bitte E-Mail und Passwort eingeben!');
+            return;
+        }
 
-        localStorage.setItem('phantom_access_token', data.access_token);
-        localStorage.setItem('phantom_user_id', data.user.id);
+        console.log('🔐 Login gestartet für:', email);
 
-        document.getElementById('authSection').classList.add('hidden');
-        document.getElementById('dashboard').classList.remove('hidden');
-        loadUserData();
+        try {
+            const response = await fetch(SUPABASE_URL + '/auth/v1/token?grant_type=password', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'apikey': SUPABASE_ANON_KEY
+                },
+                body: JSON.stringify({ email, password })
+            });
+
+            const data = await response.json();
+            console.log('📦 Antwort von Supabase:', data);
+
+            if (data.error) {
+                showError('Login fehlgeschlagen: ' + data.error.message);
+                return;
+            }
+
+            localStorage.setItem('phantom_access_token', data.access_token);
+            localStorage.setItem('phantom_user_id', data.user.id);
+
+            document.getElementById('authSection').classList.add('hidden');
+            document.getElementById('dashboard').classList.remove('hidden');
+            loadUserData();
+        } catch (e) {
+            showError('Netzwerkfehler: ' + e.message);
+            console.error(e);
+        }
     }
 
     // ============================================================
-    // LOAD USER DATA
+    // USER-DATEN LADEN
     // ============================================================
     async function loadUserData() {
         const token = localStorage.getItem('phantom_access_token');
         const userId = localStorage.getItem('phantom_user_id');
         if (!token || !userId) return;
 
-        const response = await fetch(`${SUPABASE_URL}/rest/v1/profiles?id=eq.${userId}`, {
-            headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${token}` }
-        });
-        const profiles = await response.json();
-        const profile = profiles[0];
+        try {
+            const response = await fetch(SUPABASE_URL + '/rest/v1/profiles?id=eq.' + userId, {
+                headers: {
+                    'apikey': SUPABASE_ANON_KEY,
+                    'Authorization': 'Bearer ' + token
+                }
+            });
+            const profiles = await response.json();
+            const profile = profiles[0];
 
-        document.getElementById('usernameDisplay').textContent = profile?.username || 'User';
+            document.getElementById('usernameDisplay').textContent = profile?.username || 'User';
 
-        if (profile && profile.key_activated) {
-            document.getElementById('keyStatus').innerHTML = '✅ Aktiviert (' + profile.key_activated + ')';
-            document.getElementById('keyExpiry').textContent = new Date(profile.key_expires_at).toLocaleDateString();
-            document.getElementById('downloadBtn').classList.add('active');
-        } else {
-            document.getElementById('keyStatus').innerHTML = '❌ Kein Key aktiviert';
-            document.getElementById('keyExpiry').textContent = '–';
-            document.getElementById('downloadBtn').classList.remove('active');
+            if (profile && profile.key_activated) {
+                document.getElementById('keyStatus').innerHTML = '✅ Aktiviert (' + profile.key_activated + ')';
+                document.getElementById('keyExpiry').textContent = new Date(profile.key_expires_at).toLocaleDateString();
+                document.getElementById('downloadBtn').classList.add('active');
+            } else {
+                document.getElementById('keyStatus').innerHTML = '❌ Kein Key aktiviert';
+                document.getElementById('keyExpiry').textContent = '–';
+                document.getElementById('downloadBtn').classList.remove('active');
+            }
+        } catch (e) {
+            console.error('Fehler beim Laden der User-Daten:', e);
         }
     }
 
     // ============================================================
-    // ACTIVATE KEY
+    // KEY AKTIVIEREN
     // ============================================================
     async function activateKey() {
         const key = document.getElementById('activationKey').value.trim();
         const token = localStorage.getItem('phantom_access_token');
         const userId = localStorage.getItem('phantom_user_id');
-        if (!token || !userId) { alert('❌ Bitte zuerst einloggen.'); return; }
+        if (!token || !userId) {
+            alert('❌ Bitte zuerst einloggen.');
+            return;
+        }
 
-        const keyResponse = await fetch(`${SUPABASE_URL}/rest/v1/keys?key_value=eq.${encodeURIComponent(key)}`, {
-            headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${token}` }
-        });
-        const keys = await keyResponse.json();
-        const keyData = keys[0];
+        try {
+            const keyResponse = await fetch(SUPABASE_URL + '/rest/v1/keys?key_value=eq.' + encodeURIComponent(key), {
+                headers: {
+                    'apikey': SUPABASE_ANON_KEY,
+                    'Authorization': 'Bearer ' + token
+                }
+            });
+            const keys = await keyResponse.json();
+            const keyData = keys[0];
 
-        if (!keyData) { alert('❌ Ungültiger Key.'); return; }
-        if (keyData.used_by) { alert('❌ Dieser Key wurde bereits verwendet.'); return; }
+            if (!keyData) {
+                alert('❌ Ungültiger Key.');
+                return;
+            }
+            if (keyData.used_by) {
+                alert('❌ Dieser Key wurde bereits verwendet.');
+                return;
+            }
 
-        const now = new Date().toISOString();
-        await fetch(`${SUPABASE_URL}/rest/v1/keys?id=eq.${keyData.id}`, {
-            method: 'PATCH',
-            headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${token}` },
-            body: JSON.stringify({ used_by: userId, used_at: now })
-        });
+            const now = new Date().toISOString();
+            await fetch(SUPABASE_URL + '/rest/v1/keys?id=eq.' + keyData.id, {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'apikey': SUPABASE_ANON_KEY,
+                    'Authorization': 'Bearer ' + token
+                },
+                body: JSON.stringify({ used_by: userId, used_at: now })
+            });
 
-        await fetch(`${SUPABASE_URL}/rest/v1/profiles?id=eq.${userId}`, {
-            method: 'PATCH',
-            headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${token}` },
-            body: JSON.stringify({
-                key_activated: keyData.duration,
-                key_expires_at: keyData.expires_at
-            })
-        });
+            await fetch(SUPABASE_URL + '/rest/v1/profiles?id=eq.' + userId, {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'apikey': SUPABASE_ANON_KEY,
+                    'Authorization': 'Bearer ' + token
+                },
+                body: JSON.stringify({
+                    key_activated: keyData.duration,
+                    key_expires_at: keyData.expires_at
+                })
+            });
 
-        alert('✅ Key erfolgreich aktiviert!');
-        loadUserData();
+            alert('✅ Key erfolgreich aktiviert!');
+            loadUserData();
+        } catch (e) {
+            alert('❌ Fehler bei der Key-Aktivierung: ' + e.message);
+            console.error(e);
+        }
     }
 
     // ============================================================
@@ -231,7 +330,7 @@
     }
 
     // ============================================================
-    // UPDATE CHECK
+    // UPDATE-CHECK
     // ============================================================
     setInterval(() => {
         document.getElementById('checkTime').textContent = new Date().toLocaleTimeString();
