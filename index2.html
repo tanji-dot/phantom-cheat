@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PHANTOM</title>
+    <!-- CACHE KILLER -->
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',system-ui,sans-serif}
+        body{background:#0a0a0f;color:#e0e0e0;display:flex;justify-content:center;align-items:center;min-height:100vh;padding:1rem}
+        .container{max-width:450px;width:100%;padding:2rem;background:#14141c;border-radius:2rem;border-left:4px solid #a855f7;box-shadow:0 0 60px rgba(100,0,255,0.15)}
+        h1{font-size:3rem;font-weight:800;background:linear-gradient(135deg,#a855f7,#6366f1);-webkit-background-clip:text;-webkit-text-fill-color:transparent;text-align:center;margin-bottom:0.5rem}
+        .sub{text-align:center;color:#8888aa;font-size:0.8rem;margin-bottom:1.5rem}
+        .card{background:#1a1a2e;padding:1.5rem;border-radius:1.5rem;margin:1.2rem 0}
+        .btn{background:linear-gradient(135deg,#a855f7,#6366f1);border:none;color:#fff;padding:0.8rem;border-radius:2rem;font-weight:700;cursor:pointer;width:100%;font-size:1rem}
+        .btn:hover{transform:scale(1.02)}
+        input{width:100%;padding:0.8rem;background:#1e1e2a;border:1px solid #333;border-radius:1rem;color:#fff;margin:0.5rem 0}
+        .hidden{display:none}
+        a{color:#a855f7;cursor:pointer;text-decoration:underline}
+        .msg{margin-top:0.8rem;padding:0.5rem;border-radius:0.5rem;text-align:center}
+        .error{background:#2a0a0a;color:#ff8888;border:1px solid #ff4444}
+        .success{background:#0a2a1a;color:#88ffbb;border:1px solid #44ff88}
+        .footer{text-align:center;color:#555566;font-size:0.7rem;margin-top:1.5rem}
+        #downloadBtn{opacity:0.5;pointer-events:none;transition:0.3s}
+        #downloadBtn.active{opacity:1;pointer-events:auto}
+        .version{text-align:center;color:#333;font-size:0.6rem;margin-top:0.5rem}
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>👻 PHANTOM</h1>
+    <div class="sub">▸ unsichtbar · unaufhaltsam · dein</div>
+    <div class="version">v2.0 · Cache-Killer aktiv</div>
+
+    <!-- LOGIN / REGISTRIERUNG -->
+    <div id="authSection">
+        <div id="loginForm" class="card">
+            <input type="text" id="loginEmail" placeholder="E-Mail oder Benutzername">
+            <input type="password" id="loginPassword" placeholder="Passwort">
+            <button class="btn" id="loginBtn">Anmelden</button>
+            <p style="text-align:center;margin-top:0.5rem;font-size:0.85rem;">
+                <a id="registerLink">Registrieren</a>
+            </p>
+            <div id="msgBox" class="msg hidden"></div>
+        </div>
+
+        <div id="registerForm" class="card hidden">
+            <input type="text" id="regUsername" placeholder="Benutzername">
+            <input type="email" id="regEmail" placeholder="E-Mail">
+            <input type="password" id="regPassword" placeholder="Passwort (min. 6 Zeichen)">
+            <button class="btn" id="registerBtn">Registrieren</button>
+            <p style="text-align:center;margin-top:0.5rem;font-size:0.85rem;">
+                <a id="loginLink">Zum Login</a>
+            </p>
+            <div id="regMsgBox" class="msg hidden"></div>
+        </div>
+    </div>
+
+    <!-- DASHBOARD -->
+    <div id="dashboard" class="hidden">
+        <div class="card">
+            <p style="font-size:1.2rem;font-weight:600;">Willkommen, <span id="usernameDisplay">User</span>!</p>
+        </div>
+
+        <div class="card">
+            <p><strong>Key-Status:</strong> <span id="keyStatus">❌ Kein Key aktiviert</span></p>
+            <p><strong>Gültig bis:</strong> <span id="keyExpiry">–</span></p>
+        </div>
+
+        <div class="card">
+            <a href="phantom.dll" download class="btn" id="downloadBtn">📥 PHANTOM.dll herunterladen</a>
+            <p style="font-size:0.7rem;color:#666;text-align:center;margin-top:0.3rem;">Nur mit aktivem Key</p>
+        </div>
+
+        <div class="card">
+            <input type="text" id="activationKey" placeholder="PHANTOM-XXXX-XXXX-XXXX">
+            <button class="btn" id="activateBtn">Key aktivieren</button>
+            <div id="activateMsg" class="msg hidden"></div>
+        </div>
+
+        <button class="btn" id="logoutBtn" style="background:#444;">Ausloggen</button>
+    </div>
+
+    <div class="footer">PHANTOM · 2026 · nur für Bildungszwecke</div>
+</div>
+
+<script>
+    (function() {
+        "use strict";
+        console.log('👻 PHANTOM v2.0 geladen – Cache-Killer aktiv!');
+
+        // DOM
+        var loginForm = document.getElementById('loginForm');
+        var registerForm = document.getElementById('registerForm');
+        var authSection = document.getElementById('authSection');
+        var dashboard = document.getElementById('dashboard');
+        var msgBox = document.getElementById('msgBox');
+        var regMsgBox = document.getElementById('regMsgBox');
+        var activateMsg = document.getElementById('activateMsg');
+
+        var loginBtn = document.getElementById('loginBtn');
+        var registerBtn = document.getElementById('registerBtn');
+        var activateBtn = document.getElementById('activateBtn');
+        var logoutBtn = document.getElementById('logoutBtn');
+        var registerLink = document.getElementById('registerLink');
+        var loginLink = document.getElementById('loginLink');
+
+        var usernameDisplay = document.getElementById('usernameDisplay');
+        var keyStatus = document.getElementById('keyStatus');
+        var keyExpiry = document.getElementById('keyExpiry');
+        var downloadBtn = document.getElementById('downloadBtn');
+
+        function showMsg(box, text, type) {
+            box.className = 'msg ' + type;
+            box.textContent = text;
+            box.classList.remove('hidden');
+        }
+
+        function hideMsg(box) {
+            box.classList.add('hidden');
+            box.textContent = '';
+        }
+
+        // Navigation
+        registerLink.onclick = function(e) {
+            e.preventDefault();
+            hideMsg(msgBox);
+            loginForm.style.display = 'none';
+            registerForm.style.display = 'block';
+        };
+
+        loginLink.onclick = function(e) {
+            e.preventDefault();
+            hideMsg(regMsgBox);
+            loginForm.style.display = 'block';
+            registerForm.style.display = 'none';
+        };
+
+        // Registrierung
+        registerBtn.onclick = function() {
+            hideMsg(regMsgBox);
+            var user = document.getElementById('regUsername').value.trim();
+            var email = document.getElementById('regEmail').value.trim();
+            var password = document.getElementById('regPassword').value;
+
+            if (!user || !email || !password) {
+                showMsg(regMsgBox, 'Bitte alle Felder ausfüllen!', 'error');
+                return;
+            }
+            if (password.length < 6) {
+                showMsg(regMsgBox, 'Passwort muss mindestens 6 Zeichen haben.', 'error');
+                return;
+            }
+
+            var users = JSON.parse(localStorage.getItem('phantom_users') || '[]');
+            if (users.find(function(u) { return u.username === user; })) {
+                showMsg(regMsgBox, 'Benutzername bereits vergeben!', 'error');
+                return;
+            }
+            if (users.find(function(u) { return u.email === email; })) {
+                showMsg(regMsgBox, 'E-Mail bereits registriert!', 'error');
+                return;
+            }
+
+            users.push({ username: user, email: email, password: password, key: null, keyExpiry: null, keyDuration: null });
+            localStorage.setItem('phantom_users', JSON.stringify(users));
+
+            showMsg(regMsgBox, '✅ Registrierung erfolgreich! Bitte logge dich ein.', 'success');
+            setTimeout(function() {
+                loginForm.style.display = 'block';
+                registerForm.style.display = 'none';
+            }, 1800);
+        };
+
+        // Login
+        loginBtn.onclick = function() {
+            hideMsg(msgBox);
+            var email = document.getElementById('loginEmail').value.trim();
+            var password = document.getElementById('loginPassword').value;
+
+            if (!email || !password) {
+                showMsg(msgBox, 'Bitte E-Mail und Passwort eingeben!', 'error');
+                return;
+            }
+
+            var users = JSON.parse(localStorage.getItem('phantom_users') || '[]');
+            var user = null;
+            for (var i = 0; i < users.length; i++) {
+                if ((users[i].email === email || users[i].username === email) && users[i].password === password) {
+                    user = users[i];
+                    break;
+                }
+            }
+
+            if (!user) {
+                showMsg(msgBox, 'Falsche E-Mail oder Passwort!', 'error');
+                return;
+            }
+
+            localStorage.setItem('phantom_logged_in', JSON.stringify({ username: user.username, email: user.email }));
+            authSection.style.display = 'none';
+            dashboard.style.display = 'block';
+            usernameDisplay.textContent = user.username;
+            loadUserData(user);
+        };
+
+        // User-Daten laden
+        function loadUserData(user) {
+            var now = new Date();
+
+            if (user.key && user.keyExpiry) {
+                var expiry = new Date(user.keyExpiry);
+
+                if (user.keyDuration === 'lifetime') {
+                    keyStatus.textContent = '⚡ Lifetime (unbegrenzt)';
+                    keyExpiry.textContent = '∞ Unbegrenzt';
+                    downloadBtn.classList.add('active');
+                    return;
+                }
+
+                if (expiry > now) {
+                    keyStatus.textContent = '✅ Aktiviert';
+                    keyExpiry.textContent = expiry.toLocaleDateString();
+                    downloadBtn.classList.add('active');
+                    return;
+                }
+            }
+
+            keyStatus.textContent = '❌ Kein Key aktiviert';
+            keyExpiry.textContent = '–';
+            downloadBtn.classList.remove('active');
+        }
+
+        // Key aktivieren
+        activateBtn.onclick = function() {
+            hideMsg(activateMsg);
+            var key = document.getElementById('activationKey').value.trim();
+            var loggedIn = JSON.parse(localStorage.getItem('phantom_logged_in'));
+
+            if (!loggedIn) {
+                showMsg(activateMsg, 'Bitte zuerst einloggen.', 'error');
+                return;
+            }
+            if (!key) {
+                showMsg(activateMsg, 'Bitte einen Key eingeben.', 'error');
+                return;
+            }
+
+            var validKeys = JSON.parse(localStorage.getItem('phantom_keys') || '[]');
+            var keyData = null;
+            for (var i = 0; i < validKeys.length; i++) {
+                if (validKeys[i].key === key && !validKeys[i].used) {
+                    keyData = validKeys[i];
+                    break;
+                }
+            }
+
+            if (!keyData) {
+                showMsg(activateMsg, 'Ungültiger oder bereits verwendeter Key.', 'error');
+                return;
+            }
+
+            keyData.used = true;
+            localStorage.setItem('phantom_keys', JSON.stringify(validKeys));
+
+            var users = JSON.parse(localStorage.getItem('phantom_users') || '[]');
+            var user = null;
+            for (var j = 0; j < users.length; j++) {
+                if (users[j].username === loggedIn.username) {
+                    user = users[j];
+                    break;
+                }
+            }
+
+            if (user) {
+                user.key = key;
+                user.keyDuration = keyData.duration;
+
+                if (keyData.duration === 'lifetime') {
+                    user.keyExpiry = null;
+                } else {
+                    var expiry = new Date();
+                    var days = parseInt(keyData.duration.replace('days', ''));
+                    if (isNaN(days)) days = 7;
+                    expiry.setDate(expiry.getDate() + days);
+                    user.keyExpiry = expiry.toISOString();
+                }
+
+                localStorage.setItem('phantom_users', JSON.stringify(users));
+                localStorage.setItem('phantom_logged_in', JSON.stringify({ username: user.username, email: user.email }));
+
+                showMsg(activateMsg, '✅ Key erfolgreich aktiviert!', 'success');
+                loadUserData(user);
+            }
+        };
+
+        // Logout
+        logoutBtn.onclick = function() {
+            localStorage.removeItem('phantom_logged_in');
+            dashboard.style.display = 'none';
+            authSection.style.display = 'block';
+            loginForm.style.display = 'block';
+            registerForm.style.display = 'none';
+            hideMsg(msgBox);
+            hideMsg(activateMsg);
+        };
+
+        // Init
+        (function init() {
+            var loggedIn = JSON.parse(localStorage.getItem('phantom_logged_in'));
+            if (loggedIn) {
+                var users = JSON.parse(localStorage.getItem('phantom_users') || '[]');
+                var user = null;
+                for (var i = 0; i < users.length; i++) {
+                    if (users[i].username === loggedIn.username) {
+                        user = users[i];
+                        break;
+                    }
+                }
+                if (user) {
+                    authSection.style.display = 'none';
+                    dashboard.style.display = 'block';
+                    usernameDisplay.textContent = user.username;
+                    loadUserData(user);
+                } else {
+                    localStorage.removeItem('phantom_logged_in');
+                }
+            }
+        })();
+
+        // Admin-Funktionen
+        window.generateKey = function(duration) {
+            if (!duration) duration = '7days';
+            var chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+            var key = 'PHANTOM-';
+            for (var i = 0; i < 3; i++) {
+                for (var j = 0; j < 4; j++) {
+                    key += chars.charAt(Math.floor(Math.random() * chars.length));
+                }
+                if (i < 2) key += '-';
+            }
+            var keys = JSON.parse(localStorage.getItem('phantom_keys') || '[]');
+            keys.push({ key: key, used: false, duration: duration, created: new Date().toISOString() });
+            localStorage.setItem('phantom_keys', JSON.stringify(keys));
+            alert('✅ Key generiert: ' + key + ' (Dauer: ' + duration + ')');
+            return key;
+        };
+
+        window.listKeys = function() {
+            var keys = JSON.parse(localStorage.getItem('phantom_keys') || '[]');
+            console.table(keys);
+            return keys;
+        };
+
+    })();
+</script>
+</body>
+</html>
