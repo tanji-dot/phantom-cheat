@@ -9,6 +9,7 @@
         button { background: #a855f7; color: white; font-weight: bold; cursor: pointer; }
         .hidden { display: none; }
         a { color: #a855f7; cursor: pointer; }
+        #regMsg, #msg { margin-top: 1rem; color: #ff8888; }
     </style>
 </head>
 <body>
@@ -19,7 +20,7 @@
         <input type="password" id="pass" placeholder="Passwort" />
         <button onclick="doLogin()">Anmelden</button>
         <p><a onclick="showReg()">Registrieren</a></p>
-        <div id="msg" style="color:#ff8888;margin-top:1rem;"></div>
+        <div id="msg"></div>
     </div>
     <div id="registerArea" class="hidden">
         <input type="text" id="regUser" placeholder="Benutzername" />
@@ -27,7 +28,7 @@
         <input type="password" id="regPass" placeholder="Passwort" />
         <button onclick="doRegister()">Registrieren</button>
         <p><a onclick="showLogin()">Zurück</a></p>
-        <div id="regMsg" style="color:#ff8888;margin-top:1rem;"></div>
+        <div id="regMsg"></div>
     </div>
     <div id="dashboard" class="hidden">
         <h2>✅ Eingeloggt!</h2>
@@ -35,6 +36,7 @@
         <button onclick="doLogout()">Ausloggen</button>
     </div>
 </div>
+
 <script>
     // ============================================================
     // SUPABASE-KONFIG
@@ -63,8 +65,6 @@
         const user = document.getElementById('regUser').value;
         const mail = document.getElementById('regMail').value;
         const pass = document.getElementById('regPass').value;
-
-        // 🔥 WICHTIG: Das Element für Fehlermeldungen im Register-Bereich
         const regMsg = document.getElementById('regMsg');
 
         if (!user || !mail || !pass) {
@@ -75,7 +75,6 @@
         regMsg.textContent = '⏳ Registriere...';
 
         try {
-            // 1. Account bei Supabase erstellen
             const response = await fetch(SUPABASE_URL + '/auth/v1/signup', {
                 method: 'POST',
                 headers: {
@@ -93,7 +92,6 @@
                 return;
             }
 
-            // 2. Profil in der Datenbank anlegen
             const profileResponse = await fetch(SUPABASE_URL + '/rest/v1/profiles', {
                 method: 'POST',
                 headers: {
@@ -106,7 +104,9 @@
 
             if (profileResponse.ok) {
                 regMsg.textContent = '✅ Registrierung erfolgreich! Bitte logge dich ein.';
-                // Nach erfolgreicher Registrierung zum Login wechseln
+                // Speichere die Daten für den lokalen Login-Test
+                localStorage.setItem('test_user', user);
+                localStorage.setItem('test_pass', pass);
                 setTimeout(() => {
                     showLogin();
                 }, 2000);
