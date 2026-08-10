@@ -47,7 +47,7 @@
         </div>
     </div>
 
-    <!-- ===== DASHBOARD (nur nach Login) ===== -->
+    <!-- ===== DASHBOARD ===== -->
     <div id="dashboard" class="hidden card">
         <h2>🎮 Willkommen, <span id="usernameDisplay"></span>!</h2>
         <p>Dein Key-Status: <span id="keyStatus">❌ Kein Key aktiviert</span></p>
@@ -87,7 +87,7 @@
     // ⚠️ HIER DEINE SUPABASE-DATEN EINTRAGEN!
     // ============================================================
     const SUPABASE_URL = 'https://oikomaauhwwthmpufn.supabase.co';
-    const SUPABASE_ANON_KEY = 'sb_publishable_qPFjKF7p9gXu-SJQ4neo8w_wXyqlZw-';
+    const SUPABASE_ANON_KEY = 'sb_publishable_qPFjKF7p9gXu-SJQ4neo8w_wXyqL...';
 
     // ============================================================
     // HILFSFUNKTIONEN
@@ -109,7 +109,6 @@
         const password = document.getElementById('regPassword').value;
         const username = document.getElementById('regUsername').value;
 
-        // 1. Account bei Supabase Auth erstellen
         const response = await fetch(`${SUPABASE_URL}/auth/v1/signup`, {
             method: 'POST',
             headers: {
@@ -121,7 +120,6 @@
         const data = await response.json();
         if (data.error) { alert('❌ Fehler: ' + data.error.message); return; }
 
-        // 2. Profil in der "profiles"-Tabelle anlegen
         const user = data.user;
         const profileResponse = await fetch(`${SUPABASE_URL}/rest/v1/profiles`, {
             method: 'POST',
@@ -159,7 +157,6 @@
         const data = await response.json();
         if (data.error) { alert('❌ Login fehlgeschlagen: ' + data.error.message); return; }
 
-        // Token speichern (für spätere Requests)
         localStorage.setItem('phantom_access_token', data.access_token);
         localStorage.setItem('phantom_user_id', data.user.id);
 
@@ -176,7 +173,6 @@
         const userId = localStorage.getItem('phantom_user_id');
         if (!token || !userId) return;
 
-        // Profil aus der Datenbank laden
         const response = await fetch(`${SUPABASE_URL}/rest/v1/profiles?id=eq.${userId}`, {
             headers: {
                 'apikey': SUPABASE_ANON_KEY,
@@ -210,7 +206,6 @@
         const userId = localStorage.getItem('phantom_user_id');
         if (!token || !userId) { alert('❌ Bitte zuerst einloggen.'); return; }
 
-        // 1. Prüfen, ob Key existiert und nicht verwendet wurde
         const keyResponse = await fetch(`${SUPABASE_URL}/rest/v1/keys?key_value=eq.${encodeURIComponent(key)}`, {
             headers: {
                 'apikey': SUPABASE_ANON_KEY,
@@ -229,7 +224,6 @@
             return;
         }
 
-        // 2. Key als "verwendet" markieren
         const now = new Date().toISOString();
         await fetch(`${SUPABASE_URL}/rest/v1/keys?id=eq.${keyData.id}`, {
             method: 'PATCH',
@@ -241,7 +235,6 @@
             body: JSON.stringify({ used_by: userId, used_at: now })
         });
 
-        // 3. Profil aktualisieren
         await fetch(`${SUPABASE_URL}/rest/v1/profiles?id=eq.${userId}`, {
             method: 'PATCH',
             headers: {
@@ -271,7 +264,7 @@
     }
 
     // ============================================================
-    // UPDATE-CHECK (simuliert)
+    // UPDATE-CHECK
     // ============================================================
     setInterval(() => {
         document.getElementById('checkTime').textContent = new Date().toLocaleTimeString();
