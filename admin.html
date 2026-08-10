@@ -3,298 +3,173 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PHANTOM Admin</title>
+    <title>PHANTOM · Admin</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Segoe UI', system-ui, sans-serif;
-        }
-        body {
-            background: #0a0a0f;
-            color: #e0e0e0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-        }
-        .container {
-            max-width: 800px;
-            width: 100%;
-            padding: 2rem;
-            background: rgba(20, 20, 30, 0.9);
-            border-radius: 2rem;
-            border: 1px solid #2a2a3a;
-            box-shadow: 0 0 60px rgba(100, 0, 255, 0.15);
-        }
-        h1 {
-            font-size: 3rem;
-            font-weight: 800;
-            background: linear-gradient(135deg, #a855f7, #6366f1);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            text-align: center;
-        }
-        .card {
-            background: #14141c;
-            padding: 1.5rem;
-            border-radius: 1.5rem;
-            margin: 1.5rem 0;
-            border-left: 4px solid #a855f7;
-        }
-        .btn {
-            background: linear-gradient(135deg, #a855f7, #6366f1);
-            border: none;
-            color: white;
-            padding: 0.8rem 2rem;
-            border-radius: 3rem;
-            font-weight: 700;
-            cursor: pointer;
-            transition: 0.3s;
-            font-size: 1rem;
-        }
-        .btn:hover {
-            transform: scale(1.02);
-            box-shadow: 0 0 30px rgba(168, 85, 247, 0.4);
-        }
-        select {
-            width: 100%;
-            padding: 0.8rem;
-            background: #1e1e2a;
-            border: 1px solid #333344;
-            border-radius: 1rem;
-            color: white;
-            margin: 0.5rem 0;
-            font-size: 1rem;
-        }
-        .key-box {
-            background: #0a0a12;
-            padding: 1rem;
-            border-radius: 1rem;
-            font-family: monospace;
-            font-size: 0.9rem;
-            word-break: break-all;
-            border: 1px dashed #6366f1;
-            max-height: 400px;
-            overflow-y: auto;
-            margin-top: 1rem;
-        }
-        .key-entry {
-            padding: 0.4rem 0;
-            border-bottom: 1px solid #1e1e2a;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .used {
-            color: #f87171;
-        }
-        .free {
-            color: #4ade80;
-        }
-        .msg {
-            margin-top: 1rem;
-            padding: 0.5rem;
-            border-radius: 0.5rem;
-            text-align: center;
-        }
-        .success {
-            background: #0a2a1a;
-            color: #88ffbb;
-            border: 1px solid #44ff88;
-        }
-        .error {
-            background: #2a0a0a;
-            color: #ff8888;
-            border: 1px solid #ff4444;
-        }
-        .hidden {
-            display: none;
-        }
-        footer {
-            text-align: center;
-            margin-top: 2rem;
-            color: #555566;
-            font-size: 0.8rem;
-        }
-        .flex {
-            display: flex;
-            gap: 1rem;
-            flex-wrap: wrap;
-            align-items: center;
-        }
-        .flex select {
-            flex: 2;
-        }
-        .flex button {
-            flex: 1;
-        }
-        .stats {
-            display: flex;
-            gap: 2rem;
-            justify-content: center;
-            margin-top: 0.5rem;
-        }
-        .stats span {
-            background: #1e1e2a;
-            padding: 0.3rem 1rem;
-            border-radius: 1rem;
-        }
-        .stats .number {
-            color: #a855f7;
-            font-weight: bold;
-            font-size: 1.2rem;
-        }
+        * { margin:0; padding:0; box-sizing:border-box; font-family:'Segoe UI',system-ui,sans-serif; }
+        body { background:#0a0a0f; color:#e0e0e0; display:flex; justify-content:center; align-items:center; min-height:100vh; }
+        .container { max-width:900px; width:100%; padding:2rem; background:rgba(20,20,30,0.92); border-radius:2rem; border:1px solid #2a2a3a; box-shadow:0 0 60px rgba(100,0,255,0.2); }
+        h1 { font-size:3rem; font-weight:800; background:linear-gradient(135deg,#a855f7,#6366f1); -webkit-background-clip:text; -webkit-text-fill-color:transparent; text-align:center; }
+        .card { background:#14141c; padding:1.5rem; border-radius:1.5rem; margin:1.5rem 0; border-left:4px solid #a855f7; }
+        .btn { background:linear-gradient(135deg,#a855f7,#6366f1); border:none; color:#fff; padding:0.8rem 2rem; border-radius:3rem; font-weight:700; cursor:pointer; transition:0.2s; font-size:1rem; }
+        .btn:hover { transform:scale(1.02); box-shadow:0 0 30px rgba(168,85,247,0.4); }
+        input, select { width:100%; padding:0.8rem; background:#1e1e2a; border:1px solid #333344; border-radius:1rem; color:#fff; margin:0.5rem 0; }
+        .key-box { background:#0a0a12; padding:1rem; border-radius:1rem; font-family:monospace; font-size:0.9rem; word-break:break-all; border:1px dashed #6366f1; max-height:400px; overflow-y:auto; margin-top:1rem; }
+        .key-entry { padding:0.4rem 0; border-bottom:1px solid #1e1e2a; display:flex; justify-content:space-between; align-items:center; }
+        .used { color:#f87171; }
+        .free { color:#4ade80; }
+        .lifetime { color:#fbbf24; font-weight:bold; }
+        .msg { margin-top:1rem; padding:0.5rem; border-radius:0.5rem; text-align:center; }
+        .success { background:#0a2a1a; color:#88ffbb; border:1px solid #44ff88; }
+        .error { background:#2a0a0a; color:#ff8888; border:1px solid #ff4444; }
+        .hidden { display:none; }
+        footer { text-align:center; margin-top:2rem; color:#555566; font-size:0.8rem; }
+        .flex { display:flex; gap:1rem; flex-wrap:wrap; align-items:center; }
+        .flex select { flex:2; }
+        .flex button { flex:1; }
+        .stats { display:flex; gap:2rem; justify-content:center; flex-wrap:wrap; margin-top:0.5rem; }
+        .stats span { background:#1e1e2a; padding:0.3rem 1.2rem; border-radius:2rem; }
+        .stats .number { color:#a855f7; font-weight:bold; font-size:1.2rem; }
+        .badge { font-size:0.7rem; background:#1e1e2a; padding:0.1rem 0.6rem; border-radius:1rem; margin-left:0.5rem; }
+        .badge-lifetime { background:#fbbf24; color:#0a0a0f; }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>👑 PHANTOM · Admin</h1>
-        <p style="text-align: center; color: #8888aa;">Generiere und verwalte Lizenzkeys</p>
+<div class="container">
+    <h1>👑 PHANTOM · Admin</h1>
+    <p style="text-align:center;color:#8888aa;">Generiere und verwalte Lizenzkeys</p>
 
-        <div class="card">
-            <h2>🔑 Key-Generator</h2>
-            <div class="flex">
-                <select id="duration">
-                    <option value="1day">1 Tag</option>
-                    <option value="3days">3 Tage</option>
-                    <option value="7days">7 Tage</option>
-                    <option value="30days">30 Tage</option>
-                    <option value="lifetime">⚡ Lifetime</option>
-                </select>
-                <button class="btn" id="generateBtn">⚡ Key generieren</button>
-            </div>
-            <div id="msgBox" class="msg hidden"></div>
+    <div class="card">
+        <h2>🔑 Key-Generator</h2>
+        <div class="flex">
+            <select id="duration">
+                <option value="1day">1 Tag</option>
+                <option value="3days">3 Tage</option>
+                <option value="7days">7 Tage</option>
+                <option value="30days">30 Tage</option>
+                <option value="lifetime">⚡ Lifetime</option>
+            </select>
+            <button class="btn" id="generateBtn">⚡ Key generieren</button>
         </div>
-
-        <div class="card">
-            <h2>📋 Alle generierten Keys</h2>
-            <div id="keyList" class="key-box">🔄 Lade Keys...</div>
-        </div>
-
-        <div class="card">
-            <h2>📊 Statistiken</h2>
-            <div class="stats">
-                <span>📌 Alle: <span class="number" id="totalKeys">0</span></span>
-                <span>✅ Verfügbar: <span class="number" id="freeKeys">0</span></span>
-                <span>❌ Verwendet: <span class="number" id="usedKeys">0</span></span>
-            </div>
-        </div>
-
-        <footer>PHANTOM · nur für Bildungszwecke · 2026</footer>
+        <div id="msgBox" class="msg hidden"></div>
     </div>
 
-    <script>
-        (function() {
-            "use strict";
+    <div class="card">
+        <h2>📋 Alle generierten Keys</h2>
+        <div id="keyList" class="key-box">🔄 Lade Keys...</div>
+    </div>
 
-            // DOM-Elemente
-            var generateBtn = document.getElementById('generateBtn');
-            var durationSelect = document.getElementById('duration');
-            var keyList = document.getElementById('keyList');
-            var msgBox = document.getElementById('msgBox');
-            var totalKeys = document.getElementById('totalKeys');
-            var freeKeys = document.getElementById('freeKeys');
-            var usedKeys = document.getElementById('usedKeys');
+    <div class="card">
+        <h2>📊 Quick-Statistiken</h2>
+        <div class="stats">
+            <span>📌 Alle: <span class="number" id="totalKeys">0</span></span>
+            <span>✅ Verfügbar: <span class="number" id="freeKeys">0</span></span>
+            <span>❌ Verwendet: <span class="number" id="usedKeys">0</span></span>
+            <span>⚡ Lifetime: <span class="number" id="lifetimeKeys">0</span></span>
+        </div>
+    </div>
 
-            // Nachrichten anzeigen
-            function showMsg(text, type) {
-                msgBox.className = 'msg ' + type;
-                msgBox.textContent = text;
-                msgBox.classList.remove('hidden');
+    <footer>PHANTOM · nur für Bildungszwecke · 2026</footer>
+</div>
+
+<script>
+    (function() {
+        "use strict";
+
+        var generateBtn = document.getElementById('generateBtn');
+        var durationSelect = document.getElementById('duration');
+        var keyList = document.getElementById('keyList');
+        var msgBox = document.getElementById('msgBox');
+        var totalKeys = document.getElementById('totalKeys');
+        var freeKeys = document.getElementById('freeKeys');
+        var usedKeys = document.getElementById('usedKeys');
+        var lifetimeKeys = document.getElementById('lifetimeKeys');
+
+        function showMsg(text, type) {
+            msgBox.className = 'msg ' + type;
+            msgBox.textContent = text;
+            msgBox.classList.remove('hidden');
+        }
+
+        function hideMsg() {
+            msgBox.classList.add('hidden');
+            msgBox.textContent = '';
+        }
+
+        function loadKeys() {
+            var keys = JSON.parse(localStorage.getItem('phantom_keys') || '[]');
+            if (keys.length === 0) {
+                keyList.innerHTML = '📭 Noch keine Keys generiert.';
+                totalKeys.textContent = '0';
+                freeKeys.textContent = '0';
+                usedKeys.textContent = '0';
+                lifetimeKeys.textContent = '0';
+                return;
             }
 
-            function hideMsg() {
-                msgBox.classList.add('hidden');
-                msgBox.textContent = '';
-            }
+            var html = '';
+            var total = 0;
+            var used = 0;
+            var free = 0;
+            var lifetime = 0;
 
-            // Keys aus localStorage laden
-            function loadKeys() {
-                try {
-                    var keys = JSON.parse(localStorage.getItem('phantom_keys') || '[]');
-                    
-                    if (keys.length === 0) {
-                        keyList.innerHTML = '📭 Noch keine Keys generiert.';
-                        totalKeys.textContent = '0';
-                        freeKeys.textContent = '0';
-                        usedKeys.textContent = '0';
-                        return;
-                    }
+            keys.forEach(function(k) {
+                total++;
+                if (k.used) { used++; } else { free++; }
+                if (k.duration === 'lifetime') { lifetime++; }
 
-                    var html = '';
-                    var used = 0;
-                    var free = 0;
+                var status = k.used ? '❌ verwendet' : '✅ verfügbar';
+                var statusClass = k.used ? 'used' : 'free';
+                var durationText = k.duration === 'lifetime' ? '⚡ Lifetime' : k.duration;
 
-                    for (var i = 0; i < keys.length; i++) {
-                        var k = keys[i];
-                        if (k.used) {
-                            used++;
-                        } else {
-                            free++;
-                        }
-                        var status = k.used ? '❌ verwendet' : '✅ verfügbar';
-                        var statusClass = k.used ? 'used' : 'free';
-                        html += '<div class="key-entry">';
-                        html += '<span class="' + statusClass + '">' + status + '</span>';
-                        html += ' 🔑 ' + k.key;
-                        html += '</div>';
-                    }
+                html += '<div class="key-entry">';
+                html += '<span class="' + statusClass + '">' + status + '</span>';
+                html += ' 🔑 ' + k.key;
+                html += ' <span class="badge badge-lifetime">' + durationText + '</span>';
+                html += '</div>';
+            });
 
-                    keyList.innerHTML = html;
-                    totalKeys.textContent = keys.length;
-                    freeKeys.textContent = free;
-                    usedKeys.textContent = used;
+            keyList.innerHTML = html;
+            totalKeys.textContent = total;
+            freeKeys.textContent = free;
+            usedKeys.textContent = used;
+            lifetimeKeys.textContent = lifetime;
+        }
 
-                } catch (e) {
-                    keyList.innerHTML = '❌ Fehler beim Laden: ' + e.message;
+        function generateKey() {
+            hideMsg();
+            var duration = durationSelect.value;
+            var chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+            var key = 'PHANTOM-';
+            for (var i = 0; i < 3; i++) {
+                for (var j = 0; j < 4; j++) {
+                    key += chars.charAt(Math.floor(Math.random() * chars.length));
                 }
+                if (i < 2) key += '-';
             }
 
-            // Key generieren
-            function generateKey() {
-                hideMsg();
-                
-                var duration = durationSelect.value;
-                var chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-                var key = 'PHANTOM-';
-                
-                for (var i = 0; i < 3; i++) {
-                    for (var j = 0; j < 4; j++) {
-                        key += chars.charAt(Math.floor(Math.random() * chars.length));
-                    }
-                    if (i < 2) key += '-';
-                }
+            var keys = JSON.parse(localStorage.getItem('phantom_keys') || '[]');
+            keys.push({ 
+                key: key, 
+                used: false, 
+                duration: duration, 
+                created: new Date().toISOString() 
+            });
+            localStorage.setItem('phantom_keys', JSON.stringify(keys));
 
-                try {
-                    var keys = JSON.parse(localStorage.getItem('phantom_keys') || '[]');
-                    keys.push({
-                        key: key,
-                        used: false,
-                        duration: duration,
-                        created: new Date().toISOString()
-                    });
-                    localStorage.setItem('phantom_keys', JSON.stringify(keys));
-                    
-                    showMsg('✅ Key generiert: ' + key, 'success');
-                    loadKeys();
-                } catch (e) {
-                    showMsg('❌ Fehler beim Generieren: ' + e.message, 'error');
-                }
-            }
-
-            // Event Listener
-            generateBtn.onclick = generateKey;
-
-            // Initial laden
+            showMsg('✅ Key generiert: ' + key + ' (' + duration + ')', 'success');
             loadKeys();
+        }
 
-            // Globale Hilfsfunktionen für die Konsole
-            window.adminGenerateKey = generateKey;
-            window.adminRefresh = loadKeys;
+        generateBtn.onclick = generateKey;
 
-        })();
-    </script>
+        // Initial laden
+        loadKeys();
+
+        // Globale Funktion für die Konsole
+        window.adminGenerateKey = generateKey;
+        window.adminRefresh = loadKeys;
+
+    })();
+</script>
 </body>
 </html>
