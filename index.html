@@ -66,9 +66,10 @@
 
 <script>
   // ============================================================
-  // 🔥 POCKETBASE BACKEND (DEINE RENDER-URL!)
+  // 🔥 SUPABASE-KONFIG (DEINE ECHTEN DATEN!)
   // ============================================================
-  const PB_URL = 'https://phantom-backend-917k.onrender.com';
+  const SUPABASE_URL = 'https://oikomaauhwwthmpufn.supabase.co';
+  const SUPABASE_ANON_KEY = 'sb_publishable_qPFjKF7p9gXu-SJQ4neo8w_wXyqL...';
 
   // ============================================================
   // DOM
@@ -97,7 +98,7 @@
   loginLink.onclick = () => { hideMsg(); loginForm.classList.remove('hidden'); registerForm.classList.add('hidden'); };
 
   // ============================================================
-  // REGISTRIERUNG (POCKETBASE)
+  // REGISTRIERUNG (SUPABASE)
   // ============================================================
   registerBtn.onclick = async function() {
     hideMsg();
@@ -109,22 +110,38 @@
 
     showMsg('⏳ Registriere...', 'success');
     try {
-      const res = await fetch(PB_URL + '/api/collections/users/records', {
+      const res = await fetch(SUPABASE_URL + '/auth/v1/signup', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username: user, email, password, passwordConfirm: password })
+        headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_ANON_KEY },
+        body: JSON.stringify({ email, password })
       });
       const data = await res.json();
-      if (data.code) { showMsg(data.message, 'error'); return; }
-      showMsg('✅ Registrierung erfolgreich! Bitte logge dich ein.', 'success');
-      setTimeout(() => { loginForm.classList.remove('hidden'); registerForm.classList.add('hidden'); }, 2000);
+      if (data.error) { showMsg(data.error.message, 'error'); return; }
+
+      // Profil anlegen
+      const prof = await fetch(SUPABASE_URL + '/rest/v1/profiles', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'apikey': SUPABASE_ANON_KEY,
+          'Authorization': 'Bearer ' + data.access_token
+        },
+        body: JSON.stringify({ id: data.user.id, username: user })
+      });
+      if (prof.ok) {
+        showMsg('✅ Registrierung erfolgreich! Bitte logge dich ein.', 'success');
+        setTimeout(() => { loginForm.classList.remove('hidden'); registerForm.classList.add('hidden'); }, 2000);
+      } else {
+        const err = await prof.text();
+        showMsg('Profil-Fehler: ' + err, 'error');
+      }
     } catch (e) {
       showMsg('Netzwerkfehler: ' + e.message, 'error');
     }
   };
 
   // ============================================================
-  // LOGIN (POCKETBASE)
+  // LOGIN (SUPABASE)
   // ============================================================
   loginBtn.onclick = async function() {
     hideMsg();
@@ -134,20 +151,27 @@
 
     showMsg('⏳ Logge ein...', 'success');
     try {
-      const res = await fetch(PB_URL + '/api/collections/users/auth-with-password', {
+      const res = await fetch(SUPABASE_URL + '/auth/v1/token?grant_type=password', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ identity: email, password })
+        headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_ANON_KEY },
+        body: JSON.stringify({ email, password })
       });
       const data = await res.json();
-      if (data.code) { showMsg(data.message, 'error'); return; }
+      if (data.error) { showMsg(data.error.message, 'error'); return; }
 
-      localStorage.setItem('phantom_token', data.token);
-      localStorage.setItem('phantom_user_id', data.record.id);
+      localStorage.setItem('phantom_access_token', data.access_token);
+      localStorage.setItem('phantom_user_id', data.user.id);
+
+      // Profil laden
+      const prof = await fetch(SUPABASE_URL + '/rest/v1/profiles?id=eq.' + data.user.id, {
+        headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': 'Bearer ' + data.access_token }
+      });
+      const profiles = await prof.json();
+      const profile = profiles[0];
 
       authSection.classList.add('hidden');
       dashboard.classList.remove('hidden');
-      document.getElementById('usernameDisplay').textContent = data.record.username || data.record.email;
+      document.getElementById('usernameDisplay').textContent = profile?.username || data.user.email;
 
       loadUserData();
     } catch (e) {
@@ -156,19 +180,19 @@
   };
 
   // ============================================================
-  // USER-DATEN LADEN (POCKETBASE)
+  // USER-DATEN LADEN (SUPABASE)
   // ============================================================
   async function loadUserData() {
-    const token = localStorage.getItem('phantom_token');
+    const token = localStorage.getItem('phantom_access_token');
     const uid = localStorage.getItem('phantom_user_id');
     if (!token || !uid) return;
     try {
-      const res = await fetch(PB_URL + '/api/collections/profiles/records/' + uid, {
-        headers: { 'Authorization': token }
+      const res = await fetch(SUPABASE_URL + '/rest/v1/profiles?id=eq.' + uid, {
+        headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': 'Bearer ' + token }
       });
-      const p = await res.json();
-      if (p.code) { console.error('Fehler beim Laden der User-Daten:', p.message); return; }
-      if (p.key_activated) {
+      const profiles = await res.json();
+      const p = profiles[0];
+      if (p && p.key_activated) {
         document.getElementById('keyStatus').innerHTML = '✅ Aktiviert (' + p.key_activated + ')';
         document.getElementById('keyExpiry').textContent = new Date(p.key_expires_at).toLocaleDateString();
         document.getElementById('downloadBtn').style.opacity = '1';
@@ -183,34 +207,42 @@
   }
 
   // ============================================================
-  // KEY AKTIVIEREN (POCKETBASE)
+  // KEY AKTIVIEREN (SUPABASE)
   // ============================================================
   activateBtn.onclick = async function() {
     const key = document.getElementById('activationKey').value.trim();
-    const token = localStorage.getItem('phantom_token');
+    const token = localStorage.getItem('phantom_access_token');
     const uid = localStorage.getItem('phantom_user_id');
     if (!token || !uid) { showMsg('Bitte zuerst einloggen.', 'error'); return; }
     if (!key) { showMsg('Bitte einen Key eingeben.', 'error'); return; }
 
     try {
-      const res = await fetch(PB_URL + '/api/collections/keys/records?filter=(key_value="' + key + '")', {
-        headers: { 'Authorization': token }
+      const res = await fetch(SUPABASE_URL + '/rest/v1/keys?key_value=eq.' + encodeURIComponent(key), {
+        headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': 'Bearer ' + token }
       });
-      const data = await res.json();
-      const k = data.items[0];
+      const keys = await res.json();
+      const k = keys[0];
       if (!k) { showMsg('Ungültiger Key.', 'error'); return; }
       if (k.used_by) { showMsg('Dieser Key wurde bereits verwendet.', 'error'); return; }
 
       const now = new Date().toISOString();
-      await fetch(PB_URL + '/api/collections/keys/records/' + k.id, {
+      await fetch(SUPABASE_URL + '/rest/v1/keys?id=eq.' + k.id, {
         method: 'PATCH',
-        headers: { 'Content-Type': 'application/json', 'Authorization': token },
+        headers: {
+          'Content-Type': 'application/json',
+          'apikey': SUPABASE_ANON_KEY,
+          'Authorization': 'Bearer ' + token
+        },
         body: JSON.stringify({ used_by: uid, used_at: now })
       });
 
-      await fetch(PB_URL + '/api/collections/profiles/records/' + uid, {
+      await fetch(SUPABASE_URL + '/rest/v1/profiles?id=eq.' + uid, {
         method: 'PATCH',
-        headers: { 'Content-Type': 'application/json', 'Authorization': token },
+        headers: {
+          'Content-Type': 'application/json',
+          'apikey': SUPABASE_ANON_KEY,
+          'Authorization': 'Bearer ' + token
+        },
         body: JSON.stringify({ key_activated: k.duration, key_expires_at: k.expires_at })
       });
 
@@ -225,7 +257,7 @@
   // LOGOUT
   // ============================================================
   logoutBtn.onclick = function() {
-    localStorage.removeItem('phantom_token');
+    localStorage.removeItem('phantom_access_token');
     localStorage.removeItem('phantom_user_id');
     dashboard.classList.add('hidden');
     authSection.classList.remove('hidden');
