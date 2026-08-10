@@ -1,0 +1,734 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PHANTOM · Premium</title>
+  <!-- CACHE KILLER -->
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  <style>
+    /* ===== GLOBAL ===== */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    }
+
+    body {
+      background: #0a0a0f;
+      background-image: radial-gradient(ellipse at 50% 0%, #1a0a2e 0%, #0a0a0f 70%);
+      color: #e0e0e0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      padding: 1.5rem;
+      position: relative;
+    }
+
+    /* ===== GLASMORPHISM-CONTAINER ===== */
+    .container {
+      max-width: 540px;
+      width: 100%;
+      padding: 2rem;
+      background: rgba(20, 20, 35, 0.65);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      border-radius: 2.5rem;
+      border: 1px solid rgba(168, 85, 247, 0.25);
+      box-shadow:
+        0 25px 60px rgba(0, 0, 0, 0.8),
+        inset 0 1px 0 rgba(255, 255, 255, 0.05),
+        0 0 80px rgba(100, 0, 255, 0.08);
+      position: relative;
+      overflow: hidden;
+      transition: all 0.3s ease;
+    }
+
+    /* ===== GLOW-OVERLAY ===== */
+    .container::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle at 70% 20%, rgba(168, 85, 247, 0.06) 0%, transparent 60%);
+      pointer-events: none;
+      animation: ambientGlow 8s ease-in-out infinite alternate;
+    }
+
+    @keyframes ambientGlow {
+      0% { transform: translate(-5%, -5%) scale(1); }
+      100% { transform: translate(5%, 5%) scale(1.1); }
+    }
+
+    /* ===== HEADER ===== */
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.8rem;
+      position: relative;
+      z-index: 2;
+    }
+
+    .logo {
+      font-size: 2.2rem;
+      font-weight: 800;
+      background: linear-gradient(135deg, #a855f7, #6366f1);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      letter-spacing: -1px;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .logo span {
+      font-size: 1.6rem;
+      -webkit-text-fill-color: initial;
+      color: #a855f7;
+    }
+
+    .status-badge {
+      font-size: 0.7rem;
+      background: rgba(74, 222, 128, 0.15);
+      color: #4ade80;
+      padding: 0.3rem 0.9rem;
+      border-radius: 20px;
+      border: 1px solid rgba(74, 222, 128, 0.2);
+      letter-spacing: 0.3px;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      backdrop-filter: blur(4px);
+    }
+
+    .status-badge .dot {
+      width: 7px;
+      height: 7px;
+      background: #4ade80;
+      border-radius: 50%;
+      animation: pulseDot 1.8s ease-in-out infinite;
+    }
+
+    @keyframes pulseDot {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.3; transform: scale(0.7); }
+    }
+
+    /* ===== CARDS ===== */
+    .card {
+      background: rgba(26, 26, 46, 0.6);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      padding: 1.5rem;
+      border-radius: 1.8rem;
+      margin: 1.2rem 0;
+      border: 1px solid rgba(168, 85, 247, 0.12);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+      position: relative;
+      z-index: 2;
+      transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .card:hover {
+      border-color: rgba(168, 85, 247, 0.25);
+      box-shadow: 0 8px 40px rgba(100, 0, 255, 0.08);
+    }
+
+    .card-title {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: #8888bb;
+      margin-bottom: 1rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+    }
+
+    .card-title .icon {
+      font-size: 1rem;
+    }
+
+    /* ===== INPUTS ===== */
+    input {
+      width: 100%;
+      padding: 0.9rem 1.2rem;
+      background: rgba(0, 0, 0, 0.35);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 1.2rem;
+      color: #fff;
+      font-size: 0.95rem;
+      transition: all 0.3s ease;
+      outline: none;
+      backdrop-filter: blur(4px);
+    }
+
+    input:focus {
+      border-color: #a855f7;
+      box-shadow: 0 0 20px rgba(168, 85, 247, 0.15), inset 0 0 20px rgba(168, 85, 247, 0.03);
+    }
+
+    input::placeholder {
+      color: #555577;
+      font-weight: 300;
+    }
+
+    /* ===== BUTTONS ===== */
+    .btn {
+      background: linear-gradient(135deg, #a855f7, #7c3aed);
+      border: none;
+      color: #fff;
+      padding: 0.9rem 1.8rem;
+      border-radius: 1.4rem;
+      font-weight: 700;
+      font-size: 0.95rem;
+      cursor: pointer;
+      transition: all 0.25s ease;
+      width: 100%;
+      text-align: center;
+      letter-spacing: 0.3px;
+      box-shadow: 0 4px 20px rgba(168, 85, 247, 0.2);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .btn::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(255,255,255,0.1), transparent);
+      pointer-events: none;
+    }
+
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 35px rgba(168, 85, 247, 0.35);
+    }
+
+    .btn:active {
+      transform: translateY(0px) scale(0.98);
+    }
+
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(8px);
+      box-shadow: none;
+      border: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    .btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.08);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+    }
+
+    .btn-download {
+      background: linear-gradient(135deg, #10b981, #059669);
+      box-shadow: 0 4px 20px rgba(16, 185, 129, 0.25);
+    }
+
+    .btn-download:hover {
+      box-shadow: 0 8px 35px rgba(16, 185, 129, 0.4);
+    }
+
+    .btn-download.disabled {
+      opacity: 0.4;
+      pointer-events: none;
+      filter: grayscale(0.6);
+    }
+
+    /* ===== LINKS ===== */
+    a {
+      color: #a78bfa;
+      cursor: pointer;
+      text-decoration: none;
+      font-weight: 500;
+      transition: color 0.2s ease;
+    }
+
+    a:hover {
+      color: #c4b5fd;
+    }
+
+    /* ===== MSG-BOX ===== */
+    .msg {
+      margin-top: 0.8rem;
+      padding: 0.7rem 1rem;
+      border-radius: 1rem;
+      text-align: center;
+      font-size: 0.9rem;
+      backdrop-filter: blur(4px);
+    }
+
+    .error {
+      background: rgba(220, 38, 38, 0.12);
+      color: #f87171;
+      border: 1px solid rgba(220, 38, 38, 0.15);
+    }
+
+    .success {
+      background: rgba(16, 185, 129, 0.10);
+      color: #6ee7b7;
+      border: 1px solid rgba(16, 185, 129, 0.12);
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    /* ===== DASHBOARD ===== */
+    .user-greeting {
+      font-size: 1.3rem;
+      font-weight: 600;
+      background: linear-gradient(135deg, #e0e0e0, #a78bfa);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .key-status-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.5rem 0;
+      border-bottom: 1px solid rgba(255,255,255,0.04);
+    }
+
+    .key-status-row:last-child {
+      border-bottom: none;
+    }
+
+    .key-status-label {
+      color: #8888bb;
+      font-size: 0.85rem;
+    }
+
+    .key-status-value {
+      font-weight: 600;
+      font-size: 0.95rem;
+    }
+
+    .key-status-value.active {
+      color: #4ade80;
+    }
+
+    .key-status-value.inactive {
+      color: #f87171;
+    }
+
+    .key-status-value.lifetime {
+      color: #fbbf24;
+    }
+
+    /* ===== PROGRESS-BAR ===== */
+    .progress-wrap {
+      margin-top: 0.8rem;
+      background: rgba(255,255,255,0.04);
+      border-radius: 20px;
+      height: 5px;
+      overflow: hidden;
+    }
+
+    .progress-bar {
+      height: 100%;
+      background: linear-gradient(90deg, #a855f7, #6366f1);
+      border-radius: 20px;
+      width: 0%;
+      transition: width 0.8s ease;
+    }
+
+    /* ===== FOOTER ===== */
+    .footer {
+      text-align: center;
+      margin-top: 1.8rem;
+      color: #444466;
+      font-size: 0.7rem;
+      letter-spacing: 0.5px;
+      position: relative;
+      z-index: 2;
+    }
+
+    /* ===== RESPONSIVE ===== */
+    @media (max-width: 480px) {
+      .container { padding: 1.2rem; }
+      .logo { font-size: 1.8rem; }
+      .header { flex-direction: column; align-items: flex-start; gap: 0.6rem; }
+      .status-badge { font-size: 0.65rem; padding: 0.2rem 0.7rem; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+
+  <!-- ===== HEADER ===== -->
+  <div class="header">
+    <div class="logo">
+      <span>👻</span> PHANTOM
+    </div>
+    <div class="status-badge">
+      <span class="dot"></span> ONLINE
+    </div>
+  </div>
+
+  <!-- ===== AUTH SECTION ===== -->
+  <div id="authSection">
+    <div id="loginForm" class="card">
+      <div class="card-title"><span class="icon">🔐</span> Anmelden</div>
+      <input type="text" id="loginEmail" placeholder="E-Mail oder Benutzername">
+      <input type="password" id="loginPassword" placeholder="Passwort">
+      <button class="btn" id="loginBtn">Einloggen</button>
+      <p style="text-align:center;margin-top:0.8rem;font-size:0.85rem;color:#7777aa;">
+        Neu hier? <a id="registerLink">Jetzt registrieren</a>
+      </p>
+      <div id="msgBox" class="msg hidden"></div>
+    </div>
+
+    <div id="registerForm" class="card hidden">
+      <div class="card-title"><span class="icon">📝</span> Registrieren</div>
+      <input type="text" id="regUsername" placeholder="Benutzername">
+      <input type="email" id="regEmail" placeholder="E-Mail">
+      <input type="password" id="regPassword" placeholder="Passwort (min. 6 Zeichen)">
+      <button class="btn" id="registerBtn">Account erstellen</button>
+      <p style="text-align:center;margin-top:0.8rem;font-size:0.85rem;color:#7777aa;">
+        <a id="loginLink">Zum Login</a>
+      </p>
+      <div id="regMsgBox" class="msg hidden"></div>
+    </div>
+  </div>
+
+  <!-- ===== DASHBOARD ===== -->
+  <div id="dashboard" class="hidden">
+    <div class="card">
+      <div class="user-greeting" id="usernameDisplay">👋 Willkommen, User</div>
+    </div>
+
+    <div class="card">
+      <div class="card-title"><span class="icon">📊</span> Key-Status</div>
+      <div class="key-status-row">
+        <span class="key-status-label">Status</span>
+        <span class="key-status-value inactive" id="keyStatus">❌ Kein Key aktiviert</span>
+      </div>
+      <div class="key-status-row">
+        <span class="key-status-label">Gültig bis</span>
+        <span class="key-status-value" id="keyExpiry">–</span>
+      </div>
+      <div class="progress-wrap" id="progressWrap">
+        <div class="progress-bar" id="progressBar"></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title"><span class="icon">📥</span> Download</div>
+      <a href="phantom.dll" download class="btn btn-download disabled" id="downloadBtn">📥 PHANTOM.dll herunterladen</a>
+      <p style="font-size:0.7rem;color:#555577;text-align:center;margin-top:0.5rem;">Nur mit aktivem Key verfügbar</p>
+    </div>
+
+    <div class="card">
+      <div class="card-title"><span class="icon">🔑</span> Key aktivieren</div>
+      <input type="text" id="activationKey" placeholder="PHANTOM-XXXX-XXXX-XXXX">
+      <button class="btn" id="activateBtn">Key aktivieren</button>
+      <div id="activateMsg" class="msg hidden"></div>
+    </div>
+
+    <button class="btn btn-secondary" id="logoutBtn">🚪 Ausloggen</button>
+  </div>
+
+  <!-- ===== FOOTER ===== -->
+  <div class="footer">
+    PHANTOM · <span id="footerYear">2026</span> · nur für Bildungszwecke
+  </div>
+
+</div>
+
+<script>
+  (function() {
+    "use strict";
+
+    // ===== DOM =====
+    var loginForm = document.getElementById('loginForm');
+    var registerForm = document.getElementById('registerForm');
+    var authSection = document.getElementById('authSection');
+    var dashboard = document.getElementById('dashboard');
+    var msgBox = document.getElementById('msgBox');
+    var regMsgBox = document.getElementById('regMsgBox');
+    var activateMsg = document.getElementById('activateMsg');
+
+    var loginBtn = document.getElementById('loginBtn');
+    var registerBtn = document.getElementById('registerBtn');
+    var activateBtn = document.getElementById('activateBtn');
+    var logoutBtn = document.getElementById('logoutBtn');
+    var registerLink = document.getElementById('registerLink');
+    var loginLink = document.getElementById('loginLink');
+
+    var usernameDisplay = document.getElementById('usernameDisplay');
+    var keyStatus = document.getElementById('keyStatus');
+    var keyExpiry = document.getElementById('keyExpiry');
+    var downloadBtn = document.getElementById('downloadBtn');
+    var progressBar = document.getElementById('progressBar');
+
+    // ===== HELPER =====
+    function showMsg(box, text, type) {
+      box.className = 'msg ' + type;
+      box.textContent = text;
+      box.classList.remove('hidden');
+    }
+
+    function hideMsg(box) {
+      box.classList.add('hidden');
+      box.textContent = '';
+    }
+
+    // ===== NAVIGATION =====
+    registerLink.onclick = function(e) {
+      e.preventDefault();
+      hideMsg(msgBox);
+      loginForm.style.display = 'none';
+      registerForm.style.display = 'block';
+    };
+
+    loginLink.onclick = function(e) {
+      e.preventDefault();
+      hideMsg(regMsgBox);
+      loginForm.style.display = 'block';
+      registerForm.style.display = 'none';
+    };
+
+    // ===== REGISTER =====
+    registerBtn.onclick = function() {
+      hideMsg(regMsgBox);
+      var user = document.getElementById('regUsername').value.trim();
+      var email = document.getElementById('regEmail').value.trim();
+      var password = document.getElementById('regPassword').value;
+
+      if (!user || !email || !password) {
+        showMsg(regMsgBox, 'Bitte alle Felder ausfüllen!', 'error');
+        return;
+      }
+      if (password.length < 6) {
+        showMsg(regMsgBox, 'Passwort muss mindestens 6 Zeichen haben.', 'error');
+        return;
+      }
+
+      var users = JSON.parse(localStorage.getItem('phantom_users') || '[]');
+      if (users.find(function(u) { return u.username === user; })) {
+        showMsg(regMsgBox, 'Benutzername bereits vergeben!', 'error');
+        return;
+      }
+      if (users.find(function(u) { return u.email === email; })) {
+        showMsg(regMsgBox, 'E-Mail bereits registriert!', 'error');
+        return;
+      }
+
+      users.push({ username: user, email: email, password: password, key: null, keyExpiry: null, keyDuration: null });
+      localStorage.setItem('phantom_users', JSON.stringify(users));
+
+      showMsg(regMsgBox, '✅ Registrierung erfolgreich! Bitte einloggen.', 'success');
+      setTimeout(function() {
+        loginForm.style.display = 'block';
+        registerForm.style.display = 'none';
+      }, 1800);
+    };
+
+    // ===== LOGIN =====
+    loginBtn.onclick = function() {
+      hideMsg(msgBox);
+      var email = document.getElementById('loginEmail').value.trim();
+      var password = document.getElementById('loginPassword').value;
+
+      if (!email || !password) {
+        showMsg(msgBox, 'Bitte E-Mail und Passwort eingeben!', 'error');
+        return;
+      }
+
+      var users = JSON.parse(localStorage.getItem('phantom_users') || '[]');
+      var user = null;
+      for (var i = 0; i < users.length; i++) {
+        if ((users[i].email === email || users[i].username === email) && users[i].password === password) {
+          user = users[i];
+          break;
+        }
+      }
+
+      if (!user) {
+        showMsg(msgBox, 'Falsche E-Mail oder Passwort!', 'error');
+        return;
+      }
+
+      localStorage.setItem('phantom_logged_in', JSON.stringify({ username: user.username, email: user.email }));
+      authSection.style.display = 'none';
+      dashboard.style.display = 'block';
+      usernameDisplay.textContent = '👋 Willkommen, ' + user.username;
+      loadUserData(user);
+    };
+
+    // ===== LOAD USER DATA =====
+    function loadUserData(user) {
+      var now = new Date();
+
+      if (user.key && user.keyExpiry) {
+        var expiry = new Date(user.keyExpiry);
+
+        if (user.keyDuration === 'lifetime') {
+          keyStatus.className = 'key-status-value lifetime';
+          keyStatus.textContent = '⚡ Lifetime (unbegrenzt)';
+          keyExpiry.textContent = '∞ Unbegrenzt';
+          downloadBtn.classList.remove('disabled');
+          progressBar.style.width = '100%';
+          return;
+        }
+
+        if (expiry > now) {
+          var total = 30;
+          var diff = (expiry - now) / (1000 * 60 * 60 * 24);
+          var percent = Math.max(0, Math.min(100, (diff / total) * 100));
+
+          keyStatus.className = 'key-status-value active';
+          keyStatus.textContent = '✅ Aktiviert';
+          keyExpiry.textContent = expiry.toLocaleDateString();
+          downloadBtn.classList.remove('disabled');
+          progressBar.style.width = percent + '%';
+          return;
+        }
+      }
+
+      keyStatus.className = 'key-status-value inactive';
+      keyStatus.textContent = '❌ Kein Key aktiviert';
+      keyExpiry.textContent = '–';
+      downloadBtn.classList.add('disabled');
+      progressBar.style.width = '0%';
+    }
+
+    // ===== ACTIVATE KEY =====
+    activateBtn.onclick = function() {
+      hideMsg(activateMsg);
+      var key = document.getElementById('activationKey').value.trim();
+      var loggedIn = JSON.parse(localStorage.getItem('phantom_logged_in'));
+
+      if (!loggedIn) {
+        showMsg(activateMsg, 'Bitte zuerst einloggen.', 'error');
+        return;
+      }
+      if (!key) {
+        showMsg(activateMsg, 'Bitte einen Key eingeben.', 'error');
+        return;
+      }
+
+      var validKeys = JSON.parse(localStorage.getItem('phantom_keys') || '[]');
+      var keyData = null;
+      for (var i = 0; i < validKeys.length; i++) {
+        if (validKeys[i].key === key && !validKeys[i].used) {
+          keyData = validKeys[i];
+          break;
+        }
+      }
+
+      if (!keyData) {
+        showMsg(activateMsg, 'Ungültiger oder bereits verwendeter Key.', 'error');
+        return;
+      }
+
+      keyData.used = true;
+      localStorage.setItem('phantom_keys', JSON.stringify(validKeys));
+
+      var users = JSON.parse(localStorage.getItem('phantom_users') || '[]');
+      var user = null;
+      for (var j = 0; j < users.length; j++) {
+        if (users[j].username === loggedIn.username) {
+          user = users[j];
+          break;
+        }
+      }
+
+      if (user) {
+        user.key = key;
+        user.keyDuration = keyData.duration;
+
+        if (keyData.duration === 'lifetime') {
+          user.keyExpiry = null;
+        } else {
+          var expiry = new Date();
+          var days = parseInt(keyData.duration.replace('days', ''));
+          if (isNaN(days)) days = 7;
+          expiry.setDate(expiry.getDate() + days);
+          user.keyExpiry = expiry.toISOString();
+        }
+
+        localStorage.setItem('phantom_users', JSON.stringify(users));
+        localStorage.setItem('phantom_logged_in', JSON.stringify({ username: user.username, email: user.email }));
+
+        showMsg(activateMsg, '✅ Key erfolgreich aktiviert!', 'success');
+        loadUserData(user);
+      }
+    };
+
+    // ===== LOGOUT =====
+    logoutBtn.onclick = function() {
+      localStorage.removeItem('phantom_logged_in');
+      dashboard.style.display = 'none';
+      authSection.style.display = 'block';
+      loginForm.style.display = 'block';
+      registerForm.style.display = 'none';
+      hideMsg(msgBox);
+      hideMsg(activateMsg);
+    };
+
+    // ===== INIT =====
+    (function init() {
+      var loggedIn = JSON.parse(localStorage.getItem('phantom_logged_in'));
+      if (loggedIn) {
+        var users = JSON.parse(localStorage.getItem('phantom_users') || '[]');
+        var user = null;
+        for (var i = 0; i < users.length; i++) {
+          if (users[i].username === loggedIn.username) {
+            user = users[i];
+            break;
+          }
+        }
+        if (user) {
+          authSection.style.display = 'none';
+          dashboard.style.display = 'block';
+          usernameDisplay.textContent = '👋 Willkommen, ' + user.username;
+          loadUserData(user);
+        } else {
+          localStorage.removeItem('phantom_logged_in');
+        }
+      }
+
+      document.getElementById('footerYear').textContent = new Date().getFullYear();
+    })();
+
+    // ===== ADMIN-KEY-GENERATOR =====
+    window.generateKey = function(duration) {
+      if (!duration) duration = '7days';
+      var chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+      var key = 'PHANTOM-';
+      for (var i = 0; i < 3; i++) {
+        for (var j = 0; j < 4; j++) {
+          key += chars.charAt(Math.floor(Math.random() * chars.length));
+        }
+        if (i < 2) key += '-';
+      }
+      var keys = JSON.parse(localStorage.getItem('phantom_keys') || '[]');
+      keys.push({ key: key, used: false, duration: duration, created: new Date().toISOString() });
+      localStorage.setItem('phantom_keys', JSON.stringify(keys));
+      alert('✅ Key generiert: ' + key + ' (Dauer: ' + duration + ')');
+      return key;
+    };
+
+    window.listKeys = function() {
+      var keys = JSON.parse(localStorage.getItem('phantom_keys') || '[]');
+      console.table(keys);
+      return keys;
+    };
+
+  })();
+</script>
+</body>
+</html>
