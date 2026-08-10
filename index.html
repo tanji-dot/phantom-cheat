@@ -33,8 +33,16 @@
     </div>
     <div id="msg" style="color:#ff8888;margin-top:1rem;"></div>
 </div>
-
 <script>
+    // ============================================================
+    // SUPABASE-KONFIG (DEINE DATEN!)
+    // ============================================================
+    const SUPABASE_URL = 'https://oikomaauhwwthmpufn.supabase.co';
+    const SUPABASE_ANON_KEY = 'sb_publishable_qPFjKF7p9gXu-SJQ4neo8w_wXyqL...';
+
+    // ============================================================
+    // UI-HELPER
+    // ============================================================
     function showReg() {
         document.getElementById('loginArea').classList.add('hidden');
         document.getElementById('registerArea').classList.remove('hidden');
@@ -46,22 +54,66 @@
         document.getElementById('msg').textContent = '';
     }
 
-    function doRegister() {
+    // ============================================================
+    // REGISTRIERUNG MIT SUPABASE
+    // ============================================================
+    async function doRegister() {
         const user = document.getElementById('regUser').value;
         const mail = document.getElementById('regMail').value;
         const pass = document.getElementById('regPass').value;
+
         if (!user || !mail || !pass) {
-            document.getElementById('msg').textContent = '❌ Bitte alle Felder ausfüllen!';
+            document.getElementById('regMsg').textContent = '❌ Bitte alle Felder ausfüllen!';
             return;
         }
-        // Simuliere Registrierung
-        localStorage.setItem('test_user', user);
-        localStorage.setItem('test_mail', mail);
-        localStorage.setItem('test_pass', pass);
-        document.getElementById('msg').textContent = '✅ Registrierung erfolgreich! Bitte logge dich ein.';
-        showLogin();
+
+        document.getElementById('regMsg').textContent = '⏳ Registriere...';
+
+        try {
+            const response = await fetch(SUPABASE_URL + '/auth/v1/signup', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'apikey': SUPABASE_ANON_KEY
+                },
+                body: JSON.stringify({ email: mail, password: pass })
+            });
+
+            const data = await response.json();
+            console.log('📦 Supabase Antwort:', data);
+
+            if (data.error) {
+                document.getElementById('regMsg').textContent = '❌ ' + data.error.message;
+                return;
+            }
+
+            // Profil in der Datenbank anlegen
+            const profileResponse = await fetch(SUPABASE_URL + '/rest/v1/profiles', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'apikey': SUPABASE_ANON_KEY,
+                    'Authorization': 'Bearer ' + data.access_token
+                },
+                body: JSON.stringify({ id: data.user.id, username: user })
+            });
+
+            if (profileResponse.ok) {
+                document.getElementById('regMsg').textContent = '✅ Registrierung erfolgreich! Bitte logge dich ein.';
+                showLogin();
+            } else {
+                const err = await profileResponse.text();
+                document.getElementById('regMsg').textContent = '❌ Profil-Fehler: ' + err;
+            }
+        } catch (e) {
+            document.getElementById('regMsg').textContent = '❌ Netzwerkfehler: ' + e.message;
+            console.error(e);
+        }
     }
 
+    // ============================================================
+    // LOGIN (NUR LOKALER TEST – NOCH OHNE SUPABASE)
+    // ============================================================
     function doLogin() {
         const user = document.getElementById('user').value;
         const pass = document.getElementById('pass').value;
@@ -88,5 +140,6 @@
         document.getElementById('msg').textContent = '';
     }
 </script>
+
 </body>
 </html>
