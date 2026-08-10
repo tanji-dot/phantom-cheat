@@ -142,7 +142,6 @@
       const data = await res.json();
       if (data.code) { showMsg(data.message, 'error'); return; }
 
-      // 🔥 POCKETBASE LIEFERT data.record – NICHT data.user!
       localStorage.setItem('phantom_token', data.token);
       localStorage.setItem('phantom_user_id', data.record.id);
 
@@ -150,7 +149,6 @@
       dashboard.classList.remove('hidden');
       document.getElementById('usernameDisplay').textContent = data.record.username || data.record.email;
 
-      // Key-Status laden
       loadUserData();
     } catch (e) {
       showMsg('Netzwerkfehler: ' + e.message, 'error');
@@ -195,7 +193,6 @@
     if (!key) { showMsg('Bitte einen Key eingeben.', 'error'); return; }
 
     try {
-      // Key prüfen
       const res = await fetch(PB_URL + '/api/collections/keys/records?filter=(key_value="' + key + '")', {
         headers: { 'Authorization': token }
       });
@@ -204,7 +201,6 @@
       if (!k) { showMsg('Ungültiger Key.', 'error'); return; }
       if (k.used_by) { showMsg('Dieser Key wurde bereits verwendet.', 'error'); return; }
 
-      // Key als verwendet markieren
       const now = new Date().toISOString();
       await fetch(PB_URL + '/api/collections/keys/records/' + k.id, {
         method: 'PATCH',
@@ -212,7 +208,6 @@
         body: JSON.stringify({ used_by: uid, used_at: now })
       });
 
-      // Profil aktualisieren
       await fetch(PB_URL + '/api/collections/profiles/records/' + uid, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json', 'Authorization': token },
