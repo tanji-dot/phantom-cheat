@@ -3,87 +3,179 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PHANTOM · Admin</title>
+    <title>PHANTOM · Admin Panel</title>
     <style>
         * { margin:0; padding:0; box-sizing:border-box; font-family:'Segoe UI',system-ui,sans-serif; }
-        body { background:#0a0a0f; color:#e0e0e0; display:flex; justify-content:center; align-items:center; min-height:100vh; }
-        .container { max-width:900px; width:100%; padding:2rem; background:rgba(20,20,30,0.92); border-radius:2rem; border:1px solid #2a2a3a; box-shadow:0 0 60px rgba(100,0,255,0.2); }
-        h1 { font-size:3rem; font-weight:800; background:linear-gradient(135deg,#a855f7,#6366f1); -webkit-background-clip:text; -webkit-text-fill-color:transparent; text-align:center; }
-        .card { background:#14141c; padding:1.5rem; border-radius:1.5rem; margin:1.5rem 0; border-left:4px solid #a855f7; }
-        .btn { background:linear-gradient(135deg,#a855f7,#6366f1); border:none; color:#fff; padding:0.8rem 2rem; border-radius:3rem; font-weight:700; cursor:pointer; transition:0.2s; font-size:1rem; }
-        .btn:hover { transform:scale(1.02); box-shadow:0 0 30px rgba(168,85,247,0.4); }
-        input, select { width:100%; padding:0.8rem; background:#1e1e2a; border:1px solid #333344; border-radius:1rem; color:#fff; margin:0.5rem 0; }
-        .key-box { background:#0a0a12; padding:1rem; border-radius:1rem; font-family:monospace; font-size:0.9rem; word-break:break-all; border:1px dashed #6366f1; max-height:400px; overflow-y:auto; margin-top:1rem; }
-        .key-entry { padding:0.4rem 0; border-bottom:1px solid #1e1e2a; display:flex; justify-content:space-between; align-items:center; }
-        .used { color:#f87171; }
-        .free { color:#4ade80; }
-        .lifetime { color:#fbbf24; font-weight:bold; }
-        .msg { margin-top:1rem; padding:0.5rem; border-radius:0.5rem; text-align:center; }
-        .success { background:#0a2a1a; color:#88ffbb; border:1px solid #44ff88; }
-        .error { background:#2a0a0a; color:#ff8888; border:1px solid #ff4444; }
-        .hidden { display:none; }
-        footer { text-align:center; margin-top:2rem; color:#555566; font-size:0.8rem; }
+        body { background:#0a0a0f; color:#e0e0e0; display:flex; justify-content:center; align-items:center; min-height:100vh; padding:1.5rem; }
+        .container { max-width:1100px; width:100%; padding:2rem; background:rgba(20,20,35,0.65); backdrop-filter:blur(18px); border-radius:2.5rem; border:1px solid rgba(168,85,247,0.25); box-shadow:0 25px 60px rgba(0,0,0,0.8), inset 0 1px 0 rgba(255,255,255,0.05), 0 0 80px rgba(100,0,255,0.08); position:relative; overflow:hidden; }
+        .container::before { content:''; position:absolute; top:-50%; left:-50%; width:200%; height:200%; background:radial-gradient(circle at 70% 20%, rgba(168,85,247,0.06) 0%, transparent 60%); pointer-events:none; animation:ambientGlow 8s ease-in-out infinite alternate; }
+        @keyframes ambientGlow { 0% { transform:translate(-5%, -5%) scale(1); } 100% { transform:translate(5%, 5%) scale(1.1); } }
+        .header { display:flex; justify-content:space-between; align-items:center; margin-bottom:1.8rem; position:relative; z-index:2; flex-wrap:wrap; gap:0.5rem; }
+        .logo { font-size:2.2rem; font-weight:800; background:linear-gradient(135deg,#a855f7,#6366f1); -webkit-background-clip:text; -webkit-text-fill-color:transparent; display:flex; align-items:center; gap:0.5rem; }
+        .logo span { font-size:1.6rem; -webkit-text-fill-color:initial; color:#a855f7; }
+        .status-badge { font-size:0.7rem; background:rgba(74,222,128,0.15); color:#4ade80; padding:0.3rem 0.9rem; border-radius:20px; border:1px solid rgba(74,222,128,0.2); display:flex; align-items:center; gap:0.4rem; backdrop-filter:blur(4px); }
+        .status-badge .dot { width:7px; height:7px; background:#4ade80; border-radius:50%; animation:pulseDot 1.8s ease-in-out infinite; }
+        @keyframes pulseDot { 0%,100% { opacity:1; transform:scale(1); } 50% { opacity:0.3; transform:scale(0.7); } }
+        .card { background:rgba(26,26,46,0.6); backdrop-filter:blur(8px); padding:1.5rem; border-radius:1.8rem; margin:1.2rem 0; border:1px solid rgba(168,85,247,0.12); box-shadow:0 8px 32px rgba(0,0,0,0.3); position:relative; z-index:2; transition:border-color 0.3s ease; }
+        .card:hover { border-color:rgba(168,85,247,0.25); }
+        .card-title { font-size:0.75rem; text-transform:uppercase; letter-spacing:1.5px; color:#8888bb; margin-bottom:1rem; font-weight:600; display:flex; align-items:center; gap:0.6rem; }
+        .card-title .icon { font-size:1rem; }
+        select { width:100%; padding:0.9rem 1.2rem; background:rgba(0,0,0,0.35); border:1px solid rgba(255,255,255,0.06); border-radius:1.2rem; color:#fff; font-size:0.95rem; outline:none; backdrop-filter:blur(4px); appearance:none; cursor:pointer; }
+        select:focus { border-color:#a855f7; box-shadow:0 0 20px rgba(168,85,247,0.15); }
+        select option { background:#1a1a2e; color:#e0e0e0; }
+        .btn { background:linear-gradient(135deg,#a855f7,#7c3aed); border:none; color:#fff; padding:0.9rem 1.8rem; border-radius:1.4rem; font-weight:700; font-size:0.95rem; cursor:pointer; transition:all 0.25s ease; width:100%; text-align:center; box-shadow:0 4px 20px rgba(168,85,247,0.2); position:relative; overflow:hidden; }
+        .btn::after { content:''; position:absolute; inset:0; background:linear-gradient(135deg,rgba(255,255,255,0.1),transparent); pointer-events:none; }
+        .btn:hover { transform:translateY(-2px); box-shadow:0 8px 35px rgba(168,85,247,0.35); }
+        .btn-danger { background:linear-gradient(135deg,#ef4444,#dc2626); box-shadow:0 4px 20px rgba(239,68,68,0.2); }
+        .btn-danger:hover { box-shadow:0 8px 35px rgba(239,68,68,0.4); }
+        .btn-success { background:linear-gradient(135deg,#22c55e,#16a34a); box-shadow:0 4px 20px rgba(34,197,94,0.2); }
+        .btn-success:hover { box-shadow:0 8px 35px rgba(34,197,94,0.4); }
+        .btn-sm { padding:0.4rem 0.8rem; font-size:0.75rem; width:auto; border-radius:1rem; }
         .flex { display:flex; gap:1rem; flex-wrap:wrap; align-items:center; }
         .flex select { flex:2; }
         .flex button { flex:1; }
-        .stats { display:flex; gap:2rem; justify-content:center; flex-wrap:wrap; margin-top:0.5rem; }
-        .stats span { background:#1e1e2a; padding:0.3rem 1.2rem; border-radius:2rem; }
-        .stats .number { color:#a855f7; font-weight:bold; font-size:1.2rem; }
-        .badge { font-size:0.7rem; background:#1e1e2a; padding:0.1rem 0.6rem; border-radius:1rem; margin-left:0.5rem; }
-        .badge-lifetime { background:#fbbf24; color:#0a0a0f; }
+        .key-box { background:rgba(0,0,0,0.3); padding:1rem; border-radius:1.2rem; font-family:monospace; font-size:0.85rem; word-break:break-all; border:1px dashed rgba(99,102,241,0.3); max-height:400px; overflow-y:auto; margin-top:0.5rem; }
+        .key-box::-webkit-scrollbar { width:4px; }
+        .key-box::-webkit-scrollbar-track { background:rgba(255,255,255,0.02); border-radius:10px; }
+        .key-box::-webkit-scrollbar-thumb { background:#a855f7; border-radius:10px; }
+        .key-entry { padding:0.4rem 0; border-bottom:1px solid rgba(255,255,255,0.04); display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.3rem; }
+        .used { color:#f87171; }
+        .free { color:#4ade80; }
+        .badge { font-size:0.65rem; padding:0.15rem 0.6rem; border-radius:1rem; background:rgba(255,255,255,0.06); color:#8888bb; }
+        .badge-lifetime { background:rgba(251,191,36,0.15); color:#fbbf24; border:1px solid rgba(251,191,36,0.15); }
+        .badge-used { background:rgba(248,113,113,0.1); color:#f87171; }
+        .badge-free { background:rgba(74,222,128,0.1); color:#4ade80; }
+        .badge-blacklisted { background:rgba(239,68,68,0.2); color:#ef4444; border:1px solid rgba(239,68,68,0.2); }
+        .stats { display:flex; gap:1.5rem; justify-content:center; flex-wrap:wrap; margin-top:0.5rem; }
+        .stats span { background:rgba(255,255,255,0.03); padding:0.3rem 1.2rem; border-radius:2rem; font-size:0.85rem; color:#8888bb; border:1px solid rgba(255,255,255,0.03); }
+        .stats .number { color:#a855f7; font-weight:bold; font-size:1.1rem; }
+        .stats .number-lifetime { color:#fbbf24; }
+        .stats .number-blacklisted { color:#ef4444; }
+        .msg { margin-top:0.8rem; padding:0.7rem 1rem; border-radius:1rem; text-align:center; font-size:0.9rem; backdrop-filter:blur(4px); }
+        .error { background:rgba(220,38,38,0.12); color:#f87171; border:1px solid rgba(220,38,38,0.15); }
+        .success { background:rgba(16,185,129,0.10); color:#6ee7b7; border:1px solid rgba(16,185,129,0.12); }
+        .hidden { display:none !important; }
+        .footer { text-align:center; margin-top:1.8rem; color:#444466; font-size:0.7rem; letter-spacing:0.5px; position:relative; z-index:2; }
+        .tabs { display:flex; gap:0.5rem; margin-bottom:1rem; flex-wrap:wrap; }
+        .tab { padding:0.5rem 1.2rem; border-radius:1.5rem; background:rgba(255,255,255,0.05); cursor:pointer; transition:all 0.2s; border:1px solid transparent; font-size:0.85rem; color:#8888bb; }
+        .tab:hover { background:rgba(255,255,255,0.08); }
+        .tab.active { background:rgba(168,85,247,0.15); border-color:rgba(168,85,247,0.3); color:#fff; }
+        .tab-content { display:none; }
+        .tab-content.active { display:block; }
+        .user-table { width:100%; border-collapse:collapse; font-size:0.85rem; }
+        .user-table th { text-align:left; padding:0.6rem 0.4rem; color:#8888bb; border-bottom:1px solid rgba(255,255,255,0.05); font-weight:600; font-size:0.7rem; text-transform:uppercase; letter-spacing:0.5px; }
+        .user-table td { padding:0.5rem 0.4rem; border-bottom:1px solid rgba(255,255,255,0.03); }
+        .user-table tr:hover td { background:rgba(255,255,255,0.02); }
+        .user-table .actions { display:flex; gap:0.3rem; flex-wrap:wrap; }
+        @media (max-width:600px) { .container { padding:1.2rem; } .logo { font-size:1.6rem; } .header { flex-direction:column; align-items:flex-start; gap:0.6rem; } .flex { flex-direction:column; } .flex select, .flex button { flex:1; width:100%; } .stats { gap:0.8rem; } .stats span { padding:0.2rem 0.8rem; font-size:0.75rem; } .user-table { font-size:0.7rem; } .user-table th, .user-table td { padding:0.3rem 0.2rem; } .btn-sm { padding:0.2rem 0.5rem; font-size:0.65rem; } }
     </style>
 </head>
 <body>
+
 <div class="container">
-    <h1>👑 PHANTOM · Admin</h1>
-    <p style="text-align:center;color:#8888aa;">Generiere und verwalte Lizenzkeys</p>
 
-    <div class="card">
-        <h2>🔑 Key-Generator</h2>
-        <div class="flex">
-            <select id="duration">
-                <option value="1day">1 Tag</option>
-                <option value="3days">3 Tage</option>
-                <option value="7days">7 Tage</option>
-                <option value="30days">30 Tage</option>
-                <option value="lifetime">⚡ Lifetime</option>
-            </select>
-            <button class="btn" id="generateBtn">⚡ Key generieren</button>
+    <div class="header">
+        <div class="logo"><span>👑</span> PHANTOM Admin</div>
+        <div class="status-badge"><span class="dot"></span> LIVE</div>
+    </div>
+
+    <!-- TABS -->
+    <div class="tabs">
+        <div class="tab active" data-tab="keys">🔑 Keys</div>
+        <div class="tab" data-tab="users">👥 User</div>
+        <div class="tab" data-tab="blacklist">🚫 Blacklist</div>
+    </div>
+
+    <!-- ===== TAB 1: KEYS ===== -->
+    <div id="tab-keys" class="tab-content active">
+        <div class="card">
+            <div class="card-title"><span class="icon">🔑</span> Key-Generator</div>
+            <div class="flex">
+                <select id="duration">
+                    <option value="1day">1 Tag</option>
+                    <option value="3days">3 Tage</option>
+                    <option value="7days">7 Tage</option>
+                    <option value="30days">30 Tage</option>
+                    <option value="lifetime">⚡ Lifetime</option>
+                </select>
+                <button class="btn" id="generateBtn">⚡ Generieren</button>
+            </div>
+            <div id="msgBox" class="msg hidden"></div>
         </div>
-        <div id="msgBox" class="msg hidden"></div>
-    </div>
 
-    <div class="card">
-        <h2>📋 Alle generierten Keys</h2>
-        <div id="keyList" class="key-box">🔄 Lade Keys...</div>
-    </div>
+        <div class="card">
+            <div class="card-title"><span class="icon">📋</span> Alle Keys</div>
+            <div id="keyList" class="key-box">🔄 Lade Keys...</div>
+        </div>
 
-    <div class="card">
-        <h2>📊 Quick-Statistiken</h2>
-        <div class="stats">
-            <span>📌 Alle: <span class="number" id="totalKeys">0</span></span>
-            <span>✅ Verfügbar: <span class="number" id="freeKeys">0</span></span>
-            <span>❌ Verwendet: <span class="number" id="usedKeys">0</span></span>
-            <span>⚡ Lifetime: <span class="number" id="lifetimeKeys">0</span></span>
+        <div class="card">
+            <div class="card-title"><span class="icon">📊</span> Statistiken</div>
+            <div class="stats">
+                <span>📌 Alle: <span class="number" id="totalKeys">0</span></span>
+                <span>✅ Verfügbar: <span class="number" id="freeKeys">0</span></span>
+                <span>❌ Verwendet: <span class="number" id="usedKeys">0</span></span>
+                <span>⚡ Lifetime: <span class="number number-lifetime" id="lifetimeKeys">0</span></span>
+            </div>
         </div>
     </div>
 
-    <footer>PHANTOM · nur für Bildungszwecke · 2026</footer>
+    <!-- ===== TAB 2: USERS ===== -->
+    <div id="tab-users" class="tab-content">
+        <div class="card">
+            <div class="card-title"><span class="icon">👥</span> Registrierte User</div>
+            <div id="userList" class="key-box">🔄 Lade User...</div>
+        </div>
+    </div>
+
+    <!-- ===== TAB 3: BLACKLIST ===== -->
+    <div id="tab-blacklist" class="tab-content">
+        <div class="card">
+            <div class="card-title"><span class="icon">🚫</span> Blacklist</div>
+            <p style="color:#8888bb; font-size:0.85rem; margin-bottom:0.8rem;">Hier siehst du alle gebannten User. Sie können sich nicht mehr einloggen.</p>
+            <div id="blacklistList" class="key-box">🔄 Lade Blacklist...</div>
+        </div>
+    </div>
+
+    <div class="footer">PHANTOM Admin · <span id="footerYear">2026</span> · nur für Bildungszwecke</div>
 </div>
 
 <script>
     (function() {
         "use strict";
 
+        // ===== DOM =====
         var generateBtn = document.getElementById('generateBtn');
         var durationSelect = document.getElementById('duration');
         var keyList = document.getElementById('keyList');
+        var userList = document.getElementById('userList');
+        var blacklistList = document.getElementById('blacklistList');
         var msgBox = document.getElementById('msgBox');
         var totalKeys = document.getElementById('totalKeys');
         var freeKeys = document.getElementById('freeKeys');
         var usedKeys = document.getElementById('usedKeys');
         var lifetimeKeys = document.getElementById('lifetimeKeys');
 
+        // ===== TABS =====
+        var tabs = document.querySelectorAll('.tab');
+        var contents = {
+            keys: document.getElementById('tab-keys'),
+            users: document.getElementById('tab-users'),
+            blacklist: document.getElementById('tab-blacklist')
+        };
+
+        tabs.forEach(function(tab) {
+            tab.onclick = function() {
+                tabs.forEach(function(t) { t.classList.remove('active'); });
+                tab.classList.add('active');
+                for (var key in contents) {
+                    contents[key].classList.toggle('active', key === tab.dataset.tab);
+                }
+                if (tab.dataset.tab === 'users') loadUsers();
+                if (tab.dataset.tab === 'blacklist') loadBlacklist();
+            };
+        });
+
+        // ===== HELPER =====
         function showMsg(text, type) {
             msgBox.className = 'msg ' + type;
             msgBox.textContent = text;
@@ -95,44 +187,51 @@
             msgBox.textContent = '';
         }
 
+        // ============================================================
+        //  KEYS
+        // ============================================================
         function loadKeys() {
-            var keys = JSON.parse(localStorage.getItem('phantom_keys') || '[]');
-            if (keys.length === 0) {
-                keyList.innerHTML = '📭 Noch keine Keys generiert.';
-                totalKeys.textContent = '0';
-                freeKeys.textContent = '0';
-                usedKeys.textContent = '0';
-                lifetimeKeys.textContent = '0';
-                return;
+            try {
+                var keys = JSON.parse(localStorage.getItem('phantom_keys') || '[]');
+                if (keys.length === 0) {
+                    keyList.innerHTML = '📭 Noch keine Keys generiert.';
+                    totalKeys.textContent = '0';
+                    freeKeys.textContent = '0';
+                    usedKeys.textContent = '0';
+                    lifetimeKeys.textContent = '0';
+                    return;
+                }
+
+                var html = '';
+                var total = 0, used = 0, free = 0, lifetime = 0;
+
+                for (var i = 0; i < keys.length; i++) {
+                    var k = keys[i];
+                    total++;
+                    if (k.used) { used++; } else { free++; }
+                    if (k.duration === 'lifetime') { lifetime++; }
+
+                    var status = k.used ? '❌ verwendet' : '✅ verfügbar';
+                    var statusClass = k.used ? 'used' : 'free';
+                    var durationText = k.duration === 'lifetime' ? '⚡ Lifetime' : k.duration;
+                    var badgeClass = k.duration === 'lifetime' ? 'badge-lifetime' : (k.used ? 'badge-used' : 'badge-free');
+
+                    html += '<div class="key-entry">';
+                    html += '<span class="' + statusClass + '">' + status + '</span>';
+                    html += ' 🔑 ' + k.key;
+                    html += ' <span class="badge ' + badgeClass + '">' + durationText + '</span>';
+                    html += '</div>';
+                }
+
+                keyList.innerHTML = html;
+                totalKeys.textContent = total;
+                freeKeys.textContent = free;
+                usedKeys.textContent = used;
+                lifetimeKeys.textContent = lifetime;
+
+            } catch (e) {
+                keyList.innerHTML = '❌ Fehler: ' + e.message;
             }
-
-            var html = '';
-            var total = 0;
-            var used = 0;
-            var free = 0;
-            var lifetime = 0;
-
-            keys.forEach(function(k) {
-                total++;
-                if (k.used) { used++; } else { free++; }
-                if (k.duration === 'lifetime') { lifetime++; }
-
-                var status = k.used ? '❌ verwendet' : '✅ verfügbar';
-                var statusClass = k.used ? 'used' : 'free';
-                var durationText = k.duration === 'lifetime' ? '⚡ Lifetime' : k.duration;
-
-                html += '<div class="key-entry">';
-                html += '<span class="' + statusClass + '">' + status + '</span>';
-                html += ' 🔑 ' + k.key;
-                html += ' <span class="badge badge-lifetime">' + durationText + '</span>';
-                html += '</div>';
-            });
-
-            keyList.innerHTML = html;
-            totalKeys.textContent = total;
-            freeKeys.textContent = free;
-            usedKeys.textContent = used;
-            lifetimeKeys.textContent = lifetime;
         }
 
         function generateKey() {
@@ -147,29 +246,171 @@
                 if (i < 2) key += '-';
             }
 
-            var keys = JSON.parse(localStorage.getItem('phantom_keys') || '[]');
-            keys.push({ 
-                key: key, 
-                used: false, 
-                duration: duration, 
-                created: new Date().toISOString() 
-            });
-            localStorage.setItem('phantom_keys', JSON.stringify(keys));
-
-            showMsg('✅ Key generiert: ' + key + ' (' + duration + ')', 'success');
-            loadKeys();
+            try {
+                var keys = JSON.parse(localStorage.getItem('phantom_keys') || '[]');
+                keys.push({ key: key, used: false, duration: duration, created: new Date().toISOString() });
+                localStorage.setItem('phantom_keys', JSON.stringify(keys));
+                showMsg('✅ Key generiert: ' + key + ' (' + duration + ')', 'success');
+                loadKeys();
+            } catch (e) {
+                showMsg('❌ Fehler: ' + e.message, 'error');
+            }
         }
 
+        // ============================================================
+        //  USERS
+        // ============================================================
+        function getUsers() {
+            return JSON.parse(localStorage.getItem('phantom_users') || '[]');
+        }
+
+        function saveUsers(users) {
+            localStorage.setItem('phantom_users', JSON.stringify(users));
+        }
+
+        function loadUsers() {
+            try {
+                var users = getUsers();
+                var blacklist = JSON.parse(localStorage.getItem('phantom_blacklist') || '[]');
+
+                if (users.length === 0) {
+                    userList.innerHTML = '📭 Noch keine User registriert.';
+                    return;
+                }
+
+                var html = '<table class="user-table"><thead><tr>';
+                html += '<th>User</th><th>E-Mail</th><th>Key</th><th>Status</th><th>Aktionen</th>';
+                html += '</tr></thead><tbody>';
+
+                for (var i = 0; i < users.length; i++) {
+                    var u = users[i];
+                    var isBlacklisted = blacklist.indexOf(u.username) !== -1;
+                    var keyStatus = u.key ? '✅ Aktiviert' : '❌ Kein Key';
+                    var statusColor = isBlacklisted ? 'color:#ef4444;' : (u.key ? 'color:#4ade80;' : 'color:#f87171;');
+
+                    html += '<tr>';
+                    html += '<td><strong>' + u.username + '</strong></td>';
+                    html += '<td>' + u.email + '</td>';
+                    html += '<td>' + (u.key || '–') + '</td>';
+                    html += '<td style="' + statusColor + '">' + (isBlacklisted ? '🚫 Gebannt' : (u.key ? '✅ Aktiv' : '⏳ Inaktiv')) + '</td>';
+                    html += '<td class="actions">';
+
+                    if (isBlacklisted) {
+                        html += '<button class="btn btn-success btn-sm" onclick="unblacklistUser(\'' + u.username + '\')">Entbannen</button>';
+                    } else {
+                        html += '<button class="btn btn-danger btn-sm" onclick="blacklistUser(\'' + u.username + '\')">Bannen</button>';
+                    }
+
+                    html += '</td>';
+                    html += '</tr>';
+                }
+
+                html += '</tbody></table>';
+                userList.innerHTML = html;
+
+            } catch (e) {
+                userList.innerHTML = '❌ Fehler: ' + e.message;
+            }
+        }
+
+        // ============================================================
+        //  BLACKLIST
+        // ============================================================
+        function getBlacklist() {
+            return JSON.parse(localStorage.getItem('phantom_blacklist') || '[]');
+        }
+
+        function saveBlacklist(list) {
+            localStorage.setItem('phantom_blacklist', JSON.stringify(list));
+        }
+
+        function loadBlacklist() {
+            try {
+                var blacklist = getBlacklist();
+                var users = getUsers();
+
+                if (blacklist.length === 0) {
+                    blacklistList.innerHTML = '📭 Keine User gebannt.';
+                    return;
+                }
+
+                var html = '<table class="user-table"><thead><tr>';
+                html += '<th>User</th><th>E-Mail</th><th>Key</th><th>Aktionen</th>';
+                html += '</tr></thead><tbody>';
+
+                for (var i = 0; i < blacklist.length; i++) {
+                    var username = blacklist[i];
+                    var user = users.find(function(u) { return u.username === username; });
+
+                    html += '<tr>';
+                    html += '<td><strong>' + username + '</strong></td>';
+                    html += '<td>' + (user ? user.email : '–') + '</td>';
+                    html += '<td>' + (user ? (user.key || '–') : '–') + '</td>';
+                    html += '<td><button class="btn btn-success btn-sm" onclick="unblacklistUser(\'' + username + '\')">Entbannen</button></td>';
+                    html += '</tr>';
+                }
+
+                html += '</tbody></table>';
+                blacklistList.innerHTML = html;
+
+            } catch (e) {
+                blacklistList.innerHTML = '❌ Fehler: ' + e.message;
+            }
+        }
+
+        // ============================================================
+        //  BLACKLIST FUNKTIONEN (GLOBAL)
+        // ============================================================
+        window.blacklistUser = function(username) {
+            if (confirm('Möchtest du den User "' + username + '" wirklich BANNEN?')) {
+                var blacklist = getBlacklist();
+                if (blacklist.indexOf(username) === -1) {
+                    blacklist.push(username);
+                    saveBlacklist(blacklist);
+                    loadUsers();
+                    loadBlacklist();
+                    alert('✅ User "' + username + '" wurde gebannt!');
+                } else {
+                    alert('⚠️ User ist bereits gebannt.');
+                }
+            }
+        };
+
+        window.unblacklistUser = function(username) {
+            if (confirm('Möchtest du den User "' + username + '" ENTBANNEN?')) {
+                var blacklist = getBlacklist();
+                var index = blacklist.indexOf(username);
+                if (index !== -1) {
+                    blacklist.splice(index, 1);
+                    saveBlacklist(blacklist);
+                    loadUsers();
+                    loadBlacklist();
+                    alert('✅ User "' + username + '" wurde entbannt!');
+                }
+            }
+        };
+
+        // ============================================================
+        //  EVENTS
+        // ============================================================
         generateBtn.onclick = generateKey;
 
-        // Initial laden
+        // ============================================================
+        //  INIT
+        // ============================================================
         loadKeys();
+        loadUsers();
+        loadBlacklist();
+        document.getElementById('footerYear').textContent = new Date().getFullYear();
 
-        // Globale Funktion für die Konsole
+        // Globale Hilfen
         window.adminGenerateKey = generateKey;
-        window.adminRefresh = loadKeys;
+        window.adminRefreshKeys = loadKeys;
+        window.adminRefreshUsers = loadUsers;
+        window.adminRefreshBlacklist = loadBlacklist;
 
     })();
 </script>
+
 </body>
 </html>
