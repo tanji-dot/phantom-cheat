@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PHANTOM · FiveM Cheat</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', system-ui, sans-serif; }
+        body { background: #0a0a0f; color: #e0e0e0; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
+        .container { max-width: 900px; width: 100%; padding: 2rem; background: rgba(20,20,30,0.9); border-radius: 2rem; border: 1px solid #2a2a3a; box-shadow: 0 0 60px rgba(100,0,255,0.15); }
+        h1 { font-size: 4rem; font-weight: 800; background: linear-gradient(135deg, #a855f7, #6366f1); -webkit-background-clip: text; -webkit-text-fill-color: transparent; text-align: center; letter-spacing: 4px; }
+        .subtitle { text-align: center; color: #8888aa; margin-bottom: 2rem; border-bottom: 1px solid #2a2a3a; padding-bottom: 1rem; }
+        .card { background: #14141c; padding: 1.5rem; border-radius: 1.5rem; margin: 1.5rem 0; border-left: 4px solid #a855f7; }
+        .btn { background: linear-gradient(135deg, #a855f7, #6366f1); border: none; color: white; padding: 0.8rem 2rem; border-radius: 3rem; font-weight: 700; cursor: pointer; transition: 0.3s; font-size: 1rem; }
+        .btn:hover { transform: scale(1.05); box-shadow: 0 0 30px rgba(168,85,247,0.4); }
+        input, textarea { width: 100%; padding: 0.8rem; background: #1e1e2a; border: 1px solid #333344; border-radius: 1rem; color: white; margin: 0.5rem 0; }
+        .key-box { background: #0a0a12; padding: 1rem; border-radius: 1rem; font-family: monospace; font-size: 1.2rem; word-break: break-all; border: 1px dashed #6366f1; }
+        .flex { display: flex; gap: 1rem; flex-wrap: wrap; justify-content: center; }
+        .status { padding: 0.5rem 1rem; border-radius: 2rem; background: #1e1e2a; display: inline-block; }
+        .green { color: #4ade80; }
+        .red { color: #f87171; }
+        footer { text-align: center; margin-top: 2rem; color: #555566; font-size: 0.8rem; }
+        #updateInfo { background: #1a1a28; padding: 1rem; border-radius: 1rem; margin-top: 1rem; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>👻 PHANTOM</h1>
+    <div class="subtitle">▸ unsichtbar · unaufhaltsam · dein</div>
+
+    <div class="card">
+        <h2>⬇️ Download aktueller Cheat</h2>
+        <p style="color:#aaa;">Version: <span id="version">v2.1.6</span> · letztes Update: <span id="lastUpdate">10.08.2026</span></p>
+        <br>
+        <a href="phantom.dll" download class="btn">📥 PHANTOM.dll herunterladen</a>
+        <div style="margin-top:1rem; font-size:0.8rem; color:#666;">SHA-256: <span id="sha">9f4a3c2b1e... (wird beim Upload generiert)</span></div>
+    </div>
+
+    <div class="card">
+        <h2>🔑 Key-Generator · Admin only</h2>
+        <p>Erstelle einen neuen Lizenzkey (gültig für 7 Tage):</p>
+        <div class="flex">
+            <input type="text" id="keyInput" placeholder="Key wird hier erscheinen..." readonly style="flex:2;">
+            <button class="btn" onclick="generateKey()">⚡ Key generieren</button>
+        </div>
+        <div id="keyHistory" style="margin-top:1rem;">
+            <h4>Zuletzt generierte Keys:</h4>
+            <div id="keyList" class="key-box">Keine Keys generiert.</div>
+        </div>
+    </div>
+
+    <div class="card">
+        <h2>📊 Live-Status</h2>
+        <div class="flex">
+            <span class="status"><span class="green">●</span> Server: online</span>
+            <span class="status"><span class="green">●</span> Cheat: bereit</span>
+            <span class="status"><span class="green">●</span> Bypass: aktiv</span>
+        </div>
+        <div id="updateInfo">
+            <strong>Letzte Prüfung auf Update:</strong> <span id="checkTime">soeben</span>
+            <br><small>Der Cheat prüft bei jedem Start automatisch diese Seite auf eine neue Version.</small>
+        </div>
+    </div>
+
+    <footer>
+        PHANTOM · nur für Bildungszwecke · 2026 · #rebelcode
+    </footer>
+</div>
+
+<script>
+    // ===== KEY-GENERATOR (lokal, aber du kannst es auf einen Server auslagern) =====
+    let keyHistory = [];
+
+    function generateKey() {
+        const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+        let key = 'PHANTOM-';
+        for (let i = 0; i < 4; i++) {
+            for (let j = 0; j < 4; j++) {
+                key += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            if (i < 3) key += '-';
+        }
+        // Gültigkeitsdatum (7 Tage ab heute)
+        const expiry = new Date();
+        expiry.setDate(expiry.getDate() + 7);
+        key += `|${expiry.toISOString().slice(0,10)}`;
+
+        document.getElementById('keyInput').value = key;
+        keyHistory.unshift(key);
+        if (keyHistory.length > 10) keyHistory.pop();
+        document.getElementById('keyList').innerHTML = keyHistory.map(k => `<div>🔑 ${k}</div>`).join('');
+        saveKeys();
+    }
+
+    function saveKeys() {
+        localStorage.setItem('phantomKeys', JSON.stringify(keyHistory));
+    }
+
+    function loadKeys() {
+        const saved = localStorage.getItem('phantomKeys');
+        if (saved) {
+            keyHistory = JSON.parse(saved);
+            document.getElementById('keyList').innerHTML = keyHistory.map(k => `<div>🔑 ${k}</div>`).join('');
+        }
+    }
+    loadKeys();
+
+    // Simuliere SHA-256 (in echt würdest du hier die Datei hashen)
+    document.getElementById('sha').innerText = 'a7f3c91e4b2d... (wird beim Upload berechnet)';
+
+    // Update-Checker (simuliert)
+    setInterval(() => {
+        document.getElementById('checkTime').innerText = new Date().toLocaleTimeString();
+    }, 30000);
+</script>
+</body>
+</html>
